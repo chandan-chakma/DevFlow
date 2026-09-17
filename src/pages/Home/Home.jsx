@@ -4,6 +4,7 @@ import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { CirclePlay, MoveRight, UsersRound } from 'lucide-react';
 import caro from '../../assets/images/caro.png'
+import Features from '../../Components/Features/Features.jsx';
 const Home = () => {
     return (
         <div className='bg-base-200'>
@@ -97,6 +98,9 @@ const Home = () => {
                 </div>
 
             </section>
+            {/* Feature section  */}
+
+            <Features></Features>
 
 
         </div>
