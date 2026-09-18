@@ -5,18 +5,20 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { CirclePlay, MoveRight, UsersRound } from 'lucide-react';
 import caro from '../../assets/images/caro.png'
 import Features from '../../Components/Features/Features.jsx';
+import Pricing from '../../Components/Pricing/Pricing.jsx';
+import Testimonial from '../../Components/Testimonial/Testimonial.jsx';
 const Home = () => {
     return (
         <div className='bg-base-200'>
             <section className='px-6 py-6'>
                
                 <div className="hero-content flex-col lg:flex-row-reverse gap-10 items-stretch">
-                    <div className=''>
+                    <div >
                         <Carousel showThumbs={false} showArrows={false} showStatus={false}
                             className=''
                            >
                             <div>
-                                <img src={caro}/>
+                                <img src={caro} />
                             </div>
                             <div>
                                 <img src={banner}/>
@@ -100,7 +102,37 @@ const Home = () => {
             </section>
             {/* Feature section  */}
 
-            <Features></Features>
+            <Features ></Features>
+
+            {/* Pricing section  */}
+            <Pricing></Pricing>
+
+            {/* Testimonial */}
+            <Testimonial></Testimonial>
+
+            {/* get started banner  */}
+            <section id='about' className="sm:px-6 lg:px-8">
+                <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 rounded-xl bg-primary px-6 py-8 sm:px-10 lg:flex-row lg:items-center">
+
+                    {/* Text */}
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-primary-content/80">
+                            Ready to get started?
+                        </p>
+
+                        <h2 className="mt-2 text-lg font-semibold text-primary-content sm:text-xl">
+                            Join DevFlow and take your team's productivity to the next level.
+                        </h2>
+                    </div>
+
+                    {/* Button */}
+                    <button className="btn border-0 bg-base-100 px-6 text-primary hover:bg-base-200">
+                        Get Started
+                        <MoveRight size={18} />
+                    </button>
+
+                </div>
+            </section>
 
 
         </div>
