@@ -43,10 +43,13 @@ const Navbar = () => {
                 </div>
                 
                 <div className="navbar-end gap-3">
-                    <button className='rounded-xl px-5 py-4 btn btn-accent'>Login</button>
-                    <button className='hidden sm:block btn btn-primary rounded-lg px-5 py-3'>Get Started
-                     <MoveRight size={18}/>
-                    </button>
+                    <Link to='/login' className='rounded-lg px-5 py-4 btn btn-accent'>Login</Link>
+
+                    <div className='hidden sm:block'>
+                        <button className='btn btn-primary rounded-lg px-5 py-4'>Get Started
+                            <MoveRight size={18} />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
