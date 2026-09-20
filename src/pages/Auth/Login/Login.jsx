@@ -3,14 +3,16 @@ import logo from '../../../assets/images/logo.png'
 import { Link } from 'react-router';
 import login from '../../..//assets/images/login.png'
 import { FaChartLine, FaCheckCircle, FaRegEyeSlash, FaUserFriends } from 'react-icons/fa';
-import { IoEyeOutline } from 'react-icons/io5';
+import { IoEyeOutline, IoLockClosedOutline } from 'react-icons/io5';
 import { MoveRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import SocialLogin from '../SocialLogin/SocialLogin.jsx';
+import { MdOutlineEmail } from 'react-icons/md';
+import { LuShieldCheck } from 'react-icons/lu';
 
 
 const Login = () => {
-    const [showPassword, setShowPassword] = useState(''); 
+    const [showPassword, setShowPassword] = useState(false); 
     // react hook form 
     const { register, formState: { errors }, handleSubmit } = useForm();
     const handleLoginSubmit = (data) => {
@@ -22,9 +24,9 @@ const Login = () => {
     }
     return (
         <div>
-            <div className="hero bg-base-200 min-h-screen">
+            <div className="hero bg-[#EEEEFF] min-h-screen">
                 
-                <div className="hero-content flex-col lg:flex-row">
+                <div className="hero-content flex-col lg:flex-row gap-10">
                     <div>
                         <Link to='/'>
                             <h1 className='text-5xl mb-5 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-bold'>DevFlow</h1> 
@@ -59,18 +61,27 @@ const Login = () => {
                     
                     
                     <div className="card bg-base-100 w-full max-w-md shrink-0 shadow-2xl px-3">
-                        <p className='text-right text-muted text-lg my-4'>Don't have and account? <span className='text-primary'>Register</span></p>
+                        <p className='text-right text-muted text-lg my-4 pr-6'>Don't have and account? <Link to='/register' className='text-primary ml-2'>Register</Link></p>
                         <div className="card-body">
                             <h1 className='font-bold text-neutral text-4xl'>Login to DevFlow</h1>
                             <p className='text-muted text-lg my-3'>Enter your email and password to access your account</p>
                             <form onSubmit={handleSubmit(handleLoginSubmit)}>
                                 <fieldset className="fieldset">
                                     <label className="label text-lg">Email Address</label>
-                                    <input type="email" {...register('email')} className="input w-full mb-3" placeholder="you@gmail.com" />
+                                    <div className='relative'>
+                                        <MdOutlineEmail className='absolute z-10 btn btn-xs top-2' />
+                                        <input type="email" {...register('email')} className="input w-full mb-3 pl-10" placeholder="you@gmail.com" />
+
+                                    </div>
+                                   
 
                                     <label className="label text-lg">Password</label>
                                     <div className='relative'>
-                                        <input type={showPassword ? 'text' : "password"} {...register('password')} className="input w-full mb-3" placeholder="Enter your password" />
+                                        
+                                        <IoLockClosedOutline className='absolute z-10 btn btn-xs top-2'/>
+                                        
+                                       
+                                        <input type={showPassword ? 'text' : "password"} {...register('password')} className="input w-full mb-3 pl-10" placeholder="Enter your password" />
 
                                         <button onClick={handleShowPassword} className='btn btn-md absolute right-0.5'>
                                             {showPassword ? <FaRegEyeSlash size={18} /> : <IoEyeOutline size={18} />}
@@ -91,6 +102,13 @@ const Login = () => {
                             {/* social login  */}
                             <SocialLogin></SocialLogin>
                         </div>
+
+                        <p className='flex justify-center items-center gap-2 my-10'>
+                            <LuShieldCheck
+                                className='text-primary' size={20} />
+                            <span className='text-muted text-lg'>Your information is safe with us.</span>
+                            
+                        </p>
                     </div>
                 </div>
             </div>
