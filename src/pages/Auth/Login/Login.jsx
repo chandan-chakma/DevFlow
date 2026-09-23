@@ -23,7 +23,7 @@ const Login = () => {
         signInWithEmail(data.email, data.password)
             .then(result => {
                 console.log(result);
-                navigate('/')
+                navigate('/dashboard')
                 
             })
             .catch(error => {
