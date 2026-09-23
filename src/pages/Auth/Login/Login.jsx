@@ -70,18 +70,21 @@ const Login = () => {
                                     <label className="label text-lg">Email Address</label>
                                     <div className='relative'>
                                         <MdOutlineEmail className='absolute z-10 btn btn-xs top-2' />
-                                        <input type="email" {...register('email')} className="input w-full mb-3 pl-10" placeholder="you@gmail.com" />
-
+                                        <input type="email" {...register('email',{required:'email is required'})} className="input w-full mb-3 pl-10" placeholder="you@gmail.com" />
                                     </div>
+                                    {errors.email && (<p className='text-error'>
+                                        {errors.email.message}
+                                    </p>)}
                                    
 
                                     <label className="label text-lg">Password</label>
                                     <div className='relative'>
-                                        
                                         <IoLockClosedOutline className='absolute z-10 btn btn-xs top-2'/>
-                                        
-                                       
-                                        <input type={showPassword ? 'text' : "password"} {...register('password')} className="input w-full mb-3 pl-10" placeholder="Enter your password" />
+                                    
+                                        <input type={showPassword ? 'text' : "password"} {...register('password', { required: 'Password is required' })} className="input w-full mb-3 pl-10" placeholder="Enter your password" />
+                                        {errors.password && (<p className='text-error'>
+                                            {errors.password.message}
+                                        </p>)}
 
                                         <button onClick={handleShowPassword} className='btn btn-md absolute right-0.5'>
                                             {showPassword ? <FaRegEyeSlash size={18} /> : <IoEyeOutline size={18} />}
