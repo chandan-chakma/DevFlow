@@ -8,13 +8,23 @@ import registered from '../../../assets/images/register.png'
 import { Link } from 'react-router';
 import { MdOutlineEmail } from 'react-icons/md';
 import { LuShieldCheck } from 'react-icons/lu';
+import UseAuth from '../../../Hooks/UseAuth.jsx';
 const Register = () => {
-    const [showPassword, setShowPassword] = useState
-        (false); 
+    const [showPassword, setShowPassword] = useState(false); 
+    // calling hook useAuth 
+    const { createEmailUser } =UseAuth()
         // react hook form 
         const { register, formState: { errors }, handleSubmit } = useForm();
         const handleRegisterSubmit = (data) => {
-            console.log(data);
+            // console.log(data);
+            createEmailUser(data.email, data.password)
+                .then(result => {
+                    console.log(result);
+                })
+                .catch(error => {
+                console.log(error)
+            })
+
         }
         // eye button for password showcassing 
         const handleShowPassword = (e) => {

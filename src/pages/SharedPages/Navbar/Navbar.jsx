@@ -3,9 +3,14 @@ import { Link, NavLink } from 'react-router';
 import { ArrowRight, MoveRight } from 'lucide-react';
 
 import Logo from '../../../Components/Logo/Logo.jsx'
+import UseAuth from '../../../Hooks/UseAuth.jsx';
 
 
 const Navbar = () => {
+    const { user, logOut } = UseAuth()
+    const handleLogOut = () => {
+        logOut()
+    }
     const menu = <>
         <a href="#features">Features</a>
         <a href="#pricing">Pricing</a>
@@ -43,13 +48,23 @@ const Navbar = () => {
                 </div>
                 
                 <div className="navbar-end gap-3">
-                    <Link to='/login' className='rounded-lg px-5 py-4 btn btn-accent'>Login</Link>
+                    {
+                        user ? <button onClick={handleLogOut} className='rounded-lg px-5 py-4 btn btn-accent'>Log Out</button> :
+                            <div className='flex gap-5'>
+                                <Link to='/login' className='rounded-lg px-5 py-4 btn btn-accent'>Login</Link>
+                                <div className='hidden sm:block'>
+                                    <button className='btn btn-primary rounded-lg px-5 py-4'>Get Started
+                                        <MoveRight size={18} />
+                                    </button>
+                                </div>
+                            </div>
 
-                    <div className='hidden sm:block'>
-                        <button className='btn btn-primary rounded-lg px-5 py-4'>Get Started
-                            <MoveRight size={18} />
-                        </button>
-                    </div>
+                          
+                            
+                    }
+                   
+
+                
                 </div>
             </div>
         </div>
