@@ -6,6 +6,8 @@ import State from '../../../Components/DashboardComponent/State.jsx';
 import OverviewChart from '../../../Components/DashboardComponent/OverviewChart.jsx';
 import TasksPieChart from '../../../Components/DashboardComponent/TasksPieChart.jsx';
 import RecentProject from '../../../Components/DashboardComponent/RecentProject.jsx';
+import RecentAcitvity from '../../../Components/DashboardComponent/RecentAcitvity.jsx';
+import MyTasks from '../../../Components/DashboardComponent/MyTasks.jsx';
 
 const DashBoardHome = () => {
     return (
@@ -43,14 +45,19 @@ const DashBoardHome = () => {
                     <TasksPieChart></TasksPieChart>
                 </div>
 
-                <div>
+               
+                <div className='flex justify-center items-center gap-2 mt-6'>
+                    {/* Recent Project  */}
                     <RecentProject></RecentProject>
+                    {/* My tasks  */}
+                    <MyTasks></MyTasks>
                 </div>
                 
-
             </div>
+
+            {/* sidebar  */}
             <div className='col-span-3'>
-                hello
+                <RecentAcitvity></RecentAcitvity>
 
             </div>
         </div>

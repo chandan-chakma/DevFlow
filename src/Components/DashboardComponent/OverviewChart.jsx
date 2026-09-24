@@ -11,7 +11,7 @@ const OverviewChart = () => {
         { day: "Mon", completed: 13, created: 9 },
     ];
     return (
-        <div className='w-lg rounded-xl border border-base-300 bg-white p-5 shadow-sm'>
+        <div className='w-full rounded-xl border border-base-300 bg-white p-5 shadow-sm'>
             <div className='flex justify-between items-center'>
                 <h2>Project Overview</h2>
                 {/* Date filter */}
