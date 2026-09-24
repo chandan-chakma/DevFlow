@@ -8,6 +8,7 @@ import TasksPieChart from '../../../Components/DashboardComponent/TasksPieChart.
 import RecentProject from '../../../Components/DashboardComponent/RecentProject.jsx';
 import RecentAcitvity from '../../../Components/DashboardComponent/RecentAcitvity.jsx';
 import MyTasks from '../../../Components/DashboardComponent/MyTasks.jsx';
+import Calendar from '../../../Components/DashboardComponent/Calendar.jsx';
 
 const DashBoardHome = () => {
     return (
@@ -57,7 +58,12 @@ const DashBoardHome = () => {
 
             {/* sidebar  */}
             <div className='col-span-3'>
-                <RecentAcitvity></RecentAcitvity>
+                <div>
+                    <RecentAcitvity></RecentAcitvity>
+                    <Calendar></Calendar>
+
+                </div>
+                
 
             </div>
         </div>

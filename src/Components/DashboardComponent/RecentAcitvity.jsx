@@ -2,7 +2,7 @@ import React from 'react';
 
 const RecentAcitvity = () => {
     return (
-        <div >
+        <div className='bg-white px-3'>
             <div className='flex justify-between'>
                 <h1 className='text-lg'>Recent Activity</h1>
                 <button className='text-primary'>View All</button>
