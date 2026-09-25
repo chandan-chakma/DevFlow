@@ -2,13 +2,13 @@ import React from 'react';
 import { LuCalendarDays } from 'react-icons/lu';
 import { PiHandWavingFill } from 'react-icons/pi';
 import { RiTargetFill } from 'react-icons/ri';
-import State from '../../../Components/DashboardComponent/State.jsx';
-import OverviewChart from '../../../Components/DashboardComponent/OverviewChart.jsx';
-import TasksPieChart from '../../../Components/DashboardComponent/TasksPieChart.jsx';
-import RecentProject from '../../../Components/DashboardComponent/RecentProject.jsx';
-import RecentAcitvity from '../../../Components/DashboardComponent/RecentAcitvity.jsx';
-import MyTasks from '../../../Components/DashboardComponent/MyTasks.jsx';
-import Calendar from '../../../Components/DashboardComponent/Calendar.jsx';
+import State from '../../../Components/DashboardComponent/HomeDashboard/State.jsx';
+import OverviewChart from '../../../Components/DashboardComponent/HomeDashboard/OverviewChart.jsx';
+import TasksPieChart from '../../../Components/DashboardComponent/HomeDashboard/TasksPieChart.jsx';
+import RecentProject from '../../../Components/DashboardComponent/HomeDashboard/RecentProject.jsx';
+import RecentAcitvity from '../../../Components/DashboardComponent/HomeDashboard/RecentAcitvity.jsx';
+import MyTasks from '../../../Components/DashboardComponent/HomeDashboard/MyTasks.jsx';
+import Calendar from '../../../Components/DashboardComponent/HomeDashboard/Calendar.jsx';
 
 const DashBoardHome = () => {
     return (
@@ -39,19 +39,33 @@ const DashBoardHome = () => {
                 <State></State>
 
                 
-                <div className='flex items-center gap-3 mt-4'>
-                    {/* Project OverviewChart  */}
-                    <OverviewChart></OverviewChart>
-                    {/* task Pice chart component  */}
-                    <TasksPieChart></TasksPieChart>
+                {/* Charts */}
+                <div className="mt-4 grid grid-cols-12 gap-3">
+
+                    <div className="col-span-8">
+                        <OverviewChart />
+                    </div>
+
+                    <div className="col-span-4">
+                        <TasksPieChart />
+                    </div>
+
                 </div>
 
                
-                <div className='flex justify-center items-center gap-2 mt-6'>
+                <div className='mt-4 grid grid-cols-12 gap-3'>
                     {/* Recent Project  */}
-                    <RecentProject></RecentProject>
-                    {/* My tasks  */}
-                    <MyTasks></MyTasks>
+                    <div className='col-span-8 min-w-0' >
+                        <RecentProject></RecentProject>
+
+                    </div>
+                    <div className="col-span-4 min-w-0">
+                        {/* My tasks  */}
+                        <MyTasks></MyTasks>
+
+                    </div>
+                    
+                   
                 </div>
                 
             </div>

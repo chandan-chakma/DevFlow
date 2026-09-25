@@ -4,14 +4,14 @@ import { TbBriefcase, TbChecklist, TbDeviceMobile, TbDeviceProjector, TbShopping
 
 const RecentProject = () => {
     return (
-        <div className='w-xl rounded-xl border border-base-300 bg-white p-5 shadow-sm'>
+        <div className='w-full min-w-0 rounded-xl border border-base-300 bg-white p-5 shadow-sm'>
             <div className='flex justify-between items-center'>
                 <h1 className='text-neutral text-2xl'>Recent Projects</h1>
                 <button className='text-primary'>View All</button>
             </div>
 
             {/* show Recent Project  */}
-            <div className="flex items-center gap-5 border-b border-base-300 py-4">
+            <div className="flex min-w-0 items-center gap-4 border-b border-base-300 py-4">
 
                 <div className="flex min-w-0 flex-1 items-center gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
@@ -31,14 +31,14 @@ const RecentProject = () => {
                     </div>
                 </div>
 
-                <div className="flex w-35 shrink-0 items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                     <progress
                         className="progress progress-primary w-full"
                         value="75"
                         max="100"
                     ></progress>
 
-                    <span className="text-sm text-muted">
+                    <span className="w-10 shrink-0 text-sm text-muted">
                         75%
                     </span>
                 </div>
@@ -53,7 +53,7 @@ const RecentProject = () => {
             </div>
 
             {/* Project 2 */}
-            <div className="flex items-center gap-5 border-b border-base-300 py-4">
+            <div className="flex min-w-0 items-center gap-4 border-b border-base-300 py-4">
 
                 <div className="flex min-w-0 flex-1 items-center gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
@@ -73,15 +73,15 @@ const RecentProject = () => {
                     </div>
                 </div>
 
-                <div className="flex w-35 shrink-0 items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                     <progress
                         className="progress progress-primary w-full"
-                        value="42"
+                        value="75"
                         max="100"
                     ></progress>
 
-                    <span className="w-10 text-sm text-muted">
-                        42%
+                    <span className="w-10 shrink-0 text-sm text-muted">
+                        75%
                     </span>
                 </div>
 
@@ -95,7 +95,7 @@ const RecentProject = () => {
             </div>
 
             {/* Project 3 */}
-            <div className="flex items-center gap-5 border-b border-base-300 py-4">
+            <div className="flex min-w-0 items-center gap-4 border-b border-base-300 py-4">
 
                 <div className="flex min-w-0 flex-1 items-center gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
@@ -115,15 +115,15 @@ const RecentProject = () => {
                     </div>
                 </div>
 
-                <div className="flex w-35 shrink-0 items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                     <progress
-                        className="progress progress-success w-full"
-                        value="28"
+                        className="progress progress-primary w-full"
+                        value="75"
                         max="100"
                     ></progress>
 
-                    <span className="w-10 text-sm text-muted">
-                        28%
+                    <span className="w-10 shrink-0 text-sm text-muted">
+                        75%
                     </span>
                 </div>
 
@@ -137,7 +137,7 @@ const RecentProject = () => {
             </div>
 
             {/* Project 4 */}
-            <div className="flex items-center gap-5 border-b border-base-300 py-4">
+            <div className="flex min-w-0 items-center gap-4 border-b border-base-300 py-4">
 
                 <div className="flex min-w-0 flex-1 items-center gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-pink-100">
@@ -157,15 +157,15 @@ const RecentProject = () => {
                     </div>
                 </div>
 
-                <div className="flex w-35 shrink-0 items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                     <progress
                         className="progress progress-primary w-full"
-                        value="90"
+                        value="75"
                         max="100"
                     ></progress>
 
-                    <span className="w-10 text-sm text-muted">
-                        90%
+                    <span className="w-10 shrink-0 text-sm text-muted">
+                        75%
                     </span>
                 </div>
 
@@ -199,15 +199,15 @@ const RecentProject = () => {
                     </div>
                 </div>
 
-                <div className="flex w-35 shrink-0 items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                     <progress
-                        className="progress progress-primary w-35"
-                        value="60"
+                        className="progress progress-primary w-full"
+                        value="75"
                         max="100"
                     ></progress>
 
-                    <span className="w-10 text-sm text-muted">
-                        60%
+                    <span className="w-10 shrink-0 text-sm text-muted">
+                        75%
                     </span>
                 </div>
 

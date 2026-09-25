@@ -98,14 +98,14 @@ const DashBoardLayout = () => {
                     </nav>
                     
                     {/* Page content here */}
-                    <div className="p-4 bg-base-200 min-h-screen">
+                    <div className="p-4 bg-base-200 min-h-screen ">
                         <Outlet></Outlet>
                     </div>
                 </div>
 
                 <div className="drawer-side is-drawer-close:overflow-visible">
                     <label htmlFor="my-drawer-4" aria-label="close sidebar" className="drawer-overlay"></label>
-                    <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-16 is-drawer-open:w-64 border-r-2 border-base-300">
+                    <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-16 is-drawer-open:w-46 border-r-2 border-base-300">
                         {/* Sidebar content here */}
                         <ul className="menu w-full grow space-y-3">
                             {/* List item */}
