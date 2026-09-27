@@ -2,11 +2,12 @@ import React from 'react';
 import { LuArrowDownUp, LuCalendarDays, LuChevronDown, LuEllipsis, LuFileCode2, LuUsers } from 'react-icons/lu';
 
 const ProjectsShow = () => {
+   
     return (
         <div>
             {/* filter section  */}
 
-            <div className='flex justify-around gap-8 my-8'>
+            <div className='flex flex-col md:flex-row justify-around gap-8 my-8'>
                 {/* searching project  */}
                 <div className="flex-1">
                     <label className="input rounded-lg">
@@ -27,7 +28,7 @@ const ProjectsShow = () => {
                 </div>
 
                 {/* Button  */}
-                <div className='space-x-7'>
+                <div className='space-y-5 space-x-7 md:space-x-7 '>
                     <div className="indicator">
                         <span className="indicator-item badge badge-secondary">12</span>
                         <button className="btn btn-primary rounded-xl">All Projects</button>
@@ -90,9 +91,12 @@ const ProjectsShow = () => {
                     </ul>
                 </div>
 
+
+               
+
             </div>
 
-            <div className='grid grid-cols-3 gap-5'>
+            <div className='grid grid-cols-1  md:grid-cols-3 gap-5'>
                 
 
 
