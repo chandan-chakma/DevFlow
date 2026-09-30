@@ -1,8 +1,21 @@
 import React from 'react';
 import { LuArrowDownUp, LuCalendarDays, LuChevronDown, LuEllipsis, LuFileCode2, LuUsers } from 'react-icons/lu';
+import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
+import { useQuery } from '@tanstack/react-query';
+import ProjectCard from './ProjectCard.jsx';
 
 const ProjectsShow = () => {
-   
+    const axiosSecure = UseAxiosSecures();
+    //    use tanstack state data 
+    const { data:projects=[],isLoading} = useQuery({
+        queryKey: ['projects'],
+        queryFn: async () => {
+            const res = await axiosSecure.get('/projects');
+            // console.log(res);
+            return res.data;
+        }
+    })
+    
     return (
         <div>
             {/* filter section  */}
@@ -97,8 +110,12 @@ const ProjectsShow = () => {
             </div>
 
             <div className='grid grid-cols-1  md:grid-cols-3 gap-5'>
-                
+                {
+                    projects.map(project => <ProjectCard key={project._id} project={project}>
+                    </ProjectCard>)
 
+                }
+                
 
                 <div className="w-full max-w-xl rounded-2xl border border-base-300 bg-base-100 p-7 shadow-sm transition-shadow duration-200 hover:shadow-md">
 
