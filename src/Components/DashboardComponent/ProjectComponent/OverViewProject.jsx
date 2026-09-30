@@ -1,15 +1,17 @@
-import { LucideFolderPlus } from 'lucide-react';
 import React, { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaPlus } from 'react-icons/fa';
 import { GoFileDirectoryFill } from 'react-icons/go';
 import { LuCalendarDays, LuChevronDown, LuFolderPlus, LuLightbulb, LuX } from 'react-icons/lu';
+import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
+import Swal from 'sweetalert2';
+import { RiProjector2Line } from 'react-icons/ri';
 
 
 const OverViewProject = () => {
     const openProjectModalRef = useRef();
     const handleOpenProjectModal = () => {
-        console.log("open modal")
+        // console.log("open modal")
         openProjectModalRef.current.showModal();
     }
     const {
@@ -22,12 +24,38 @@ const OverViewProject = () => {
         },
     });
 
+    const axiosSecure = UseAxiosSecures();
+
     const onSubmit = (data) => {
         console.log("Project data:", data);
+        axiosSecure.post('/projects', data)
+            .then(res => {
+                // console.log(res)
+                openProjectModalRef.current.close();
+                if (res.data.insertedId) {
+                    Swal.fire({
+                        title: "Your project successfully created!",
+                        icon: "success",
+                        draggable: true,
+                        timer:2500
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Create project error:", error);
+
+                Swal.fire({
+                    title: "Failed to create project",
+                    text: "Something went wrong.",
+                    icon: "error"
+                });
+        })
+        }
+
 
         // This will later call:
         // axiosSecure.post("/api/projects", data)
-    };
+    
     return (
         <div>
             {/* Title section  */}
@@ -98,7 +126,7 @@ const OverViewProject = () => {
 
                                 <div className="relative">
 
-                                    <LucideFolderPlus
+                                    <RiProjector2Line 
                                         size={20}
                                         className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                                     />
