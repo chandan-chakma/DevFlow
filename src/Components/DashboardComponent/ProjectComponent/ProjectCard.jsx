@@ -1,8 +1,11 @@
 import React from 'react';
 import { LuCalendarDays, LuEllipsis, LuFileCode2, LuUser } from 'react-icons/lu';
+import Swal from 'sweetalert2';
+import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 
-const ProjectCard = ({ project }) => {
-    const { name, description, status, dueDate } = project;
+const ProjectCard = ({ project,refetch }) => {
+    const axiosSecure = UseAxiosSecures()
+    const { _id,name, description, status, dueDate } = project;
 
     // change data format 
     const formattedDate = new Date(dueDate).toLocaleDateString("en-US", {
@@ -10,6 +13,37 @@ const ProjectCard = ({ project }) => {
         day: "numeric",
         year: "numeric",
     });
+
+    const handleDeleteProject = (id) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axiosSecure.delete(`/projects/${id}`)
+                    .then(res => {
+                        // console.log(res)
+                        refetch();
+                        if (res.data.deletedCount) {
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: "Your file has been deleted.",
+                                icon: "success"
+                            });
+                        }
+                })
+            }
+                
+              
+        });
+        
+    }
+
     return (
         <div>
              <div className="w-full max-w-xl rounded-2xl border border-base-300 bg-base-100 p-7 shadow-sm transition-shadow duration-200 hover:shadow-md">
@@ -30,12 +64,41 @@ const ProjectCard = ({ project }) => {
                                     <div className="flex flex-col items-end gap-4">
             
                                         {/* More button */}
-                                        <button
-                                            type="button"
-                                            className="rounded-lg p-1 text-slate-500 transition hover:bg-base-200 hover:text-base-content"
-                                        >
-                                            <LuEllipsis size={23} />
-                                        </button>
+                        <div className="dropdown dropdown-end">
+                            <button
+                                tabIndex={0}
+                                type="button"
+                                className="rounded-lg p-1.5 text-slate-500 transition hover:bg-base-200 hover:text-base-content"
+                            >
+                                <LuEllipsis size={23} />
+                            </button>
+
+                            <ul
+                                tabIndex={-1}
+                                className="menu dropdown-content z-50 mt-2 w-40 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
+                            >
+                                <li>
+                                    <button type="button">
+                                        View
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button type="button">
+                                        Edit
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button onClick={()=>handleDeleteProject(_id)}
+                                        type="button"
+                                        className="text-error"
+                                    >
+                                        Delete
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
             
                                         {/* Status */}
                                         <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-500">
