@@ -2,6 +2,7 @@ import React from 'react';
 import { LuCalendarDays, LuEllipsis, LuFileCode2, LuUser } from 'react-icons/lu';
 import Swal from 'sweetalert2';
 import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const ProjectCard = ({ project,refetch }) => {
     const axiosSecure = UseAxiosSecures()
@@ -14,6 +15,22 @@ const ProjectCard = ({ project,refetch }) => {
         year: "numeric",
     });
 
+    // using tanstak library usemutation for refetch ui
+    const queryClient = useQueryClient()
+
+    const deleteProjectMutation = useMutation({
+        mutationFn: async (id) => {
+            const res = await axiosSecure.delete(`/projects/${id}`)
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['projects'] })
+                
+        }
+       
+        
+    })
+
     const handleDeleteProject = (id) => {
         Swal.fire({
             title: "Are you sure?",
@@ -25,18 +42,13 @@ const ProjectCard = ({ project,refetch }) => {
             confirmButtonText: "Yes, delete it!"
         }).then((result) => {
             if (result.isConfirmed) {
-                axiosSecure.delete(`/projects/${id}`)
-                    .then(res => {
-                        // console.log(res)
-                        refetch();
-                        if (res.data.deletedCount) {
-                            Swal.fire({
-                                title: "Deleted!",
-                                text: "Your file has been deleted.",
-                                icon: "success"
-                            });
-                        }
-                })
+                deleteProjectMutation.mutate(id)
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Your file has been deleted.",
+                    icon: "success"
+                });
+           
             }
                 
               

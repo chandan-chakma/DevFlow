@@ -6,6 +6,7 @@ import { LuCalendarDays, LuChevronDown, LuFolderPlus, LuLightbulb, LuX } from 'r
 import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 import Swal from 'sweetalert2';
 import { RiProjector2Line } from 'react-icons/ri';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 
 const OverViewProject = () => {
@@ -25,32 +26,44 @@ const OverViewProject = () => {
     });
 
     const axiosSecure = UseAxiosSecures();
+    // using tanstak library usemutation for refetch ui
+    const queryClient = useQueryClient()
+    const postProjectMutation = useMutation({
+        mutationFn: async (postProject)=>{
+            const res = await axiosSecure.post('/projects', postProject)
+            return res.data;
+        }, 
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({
+                queryKey:['projects']
+            })
+            if (data.insertedId) {
+                Swal.fire({
+                    title: "Your project successfully created!",
+                    icon: "success",
+                    draggable: true,
+                    timer: 2500
+                });
+            }
+        },
+        onError: (error) => {
+            Swal.fire({
+                title: "Failed to create project",
+                text: "Something went wrong.",
+                icon: "error"
+            });
+            
+        }
+    })
 
     const onSubmit = (data) => {
         console.log("Project data:", data);
-        axiosSecure.post('/projects', data)
-            .then(res => {
-                // console.log(res)
-                openProjectModalRef.current.close();
-                if (res.data.insertedId) {
-                    Swal.fire({
-                        title: "Your project successfully created!",
-                        icon: "success",
-                        draggable: true,
-                        timer:2500
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("Create project error:", error);
-
-                Swal.fire({
-                    title: "Failed to create project",
-                    text: "Something went wrong.",
-                    icon: "error"
-                });
-        })
-        }
+    
+        postProjectMutation.mutate(data);
+            // console.log(res)
+        openProjectModalRef.current.close();
+       
+    }
 
 
         // This will later call:
