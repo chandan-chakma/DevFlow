@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LuArrowDownUp, LuChevronDown,  } from 'react-icons/lu';
 import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 import { useQuery } from '@tanstack/react-query';
@@ -6,15 +6,41 @@ import ProjectCard from './ProjectCard.jsx';
 
 const ProjectsShow = () => {
     const axiosSecure = UseAxiosSecures();
+    // for search project 
+    const [search, setSearch] = useState('');
+    // for filtering button
+    // Active button 
+    const [status, setStatus] = useState(''); 
+    // sorting filter
+    const [sort, setSort] = useState('latest');
     //    use tanstack state data 
     const { data:projects=[],isLoading,refetch} = useQuery({
-        queryKey: ['projects'],
+        queryKey: ['projects',search,status,sort],
         queryFn: async () => {
-            const res = await axiosSecure.get('/projects');
+            const res = await axiosSecure.get(`/projects?searchText=${search}&status=${status}&sort=${sort}`);
             // console.log(res);
             return res.data;
         }
     })
+
+    // searchig handle  
+    const handleSearchProjects = (e) => {
+        const searching = e.target.value;
+        // console.log(searching)
+        setSearch(searching);
+    }
+
+    // filter status Active 
+    const handleStatusProject = (selectedStatus) => {
+        setStatus(selectedStatus);
+        // console.log(status)
+    }
+
+    // filter sorting 
+    const handleFilterSort = (selectedSort) => {
+        setSort(selectedSort);
+    };
+
     
     return (
         <div>
@@ -36,7 +62,7 @@ const ProjectsShow = () => {
                                 <path d="m21 21-4.3-4.3"></path>
                             </g>
                         </svg>
-                        <input type="search" required placeholder="Search projects..." />
+                        <input onChange={handleSearchProjects} type="search" required placeholder="Search projects..." />
                     </label>
                 </div>
 
@@ -44,11 +70,11 @@ const ProjectsShow = () => {
                 <div className='space-y-5 space-x-7 md:space-x-7 '>
                     <div className="indicator">
                         <span className="indicator-item badge badge-secondary">12</span>
-                        <button className="btn btn-primary rounded-xl">All Projects</button>
+                        <button onClick={() => handleStatusProject('')} className={`btn ${status === '' ?'btn-primary' : 'bg-[#FEFFFE]'} rounded-xl`}>All Projects</button>
                     </div>
                     <div className="indicator">
                         <span className="indicator-item badge badge-secondary">12</span>
-                        <button className="btn bg-[#FEFFFE] rounded-xl">Active</button>
+                        <button onClick={() => handleStatusProject('active')} className={`btn ${status === 'active' ? 'btn-primary' : 'bg-[#FEFFFE]'} rounded-xl`}>Active</button>
                     </div>
                     <div className="indicator">
                         <span className="indicator-item badge badge-secondary">12</span>
@@ -56,7 +82,7 @@ const ProjectsShow = () => {
                     </div>
                     <div className="indicator">
                         <span className="indicator-item badge badge-secondary">12</span>
-                        <button className="btn bg-[#FEFFFE] rounded-xl">Completed</button>
+                        <button onClick={() => handleStatusProject('completed')} className={`btn ${status === 'completed' ? 'btn-primary' : 'bg-[#FEFFFE]'} rounded-xl`}>Completed</button>
                     </div>
                 </div>
 
@@ -64,7 +90,7 @@ const ProjectsShow = () => {
                 <div className="dropdown dropdown-end">
                     <button
                         tabIndex={0}
-                        type="button"
+                        role="button"
                         className="flex h-10 w-56 items-center justify-between rounded-xl border border-base-300 bg-base-100 px-5 text-lg font-semibold text-slate-500 shadow-sm hover:bg-base-200"
                     >
                         <div className="flex items-center gap-2">
@@ -73,7 +99,17 @@ const ProjectsShow = () => {
                                 className="text-slate-500"
                             />
 
-                            <span>Sort by: Latest</span>
+                            <span>
+                                Sort by: {
+                                    sort === 'latest'
+                                        ? 'Latest'
+                                        : sort === 'oldest'
+                                            ? 'Oldest'
+                                            : sort === 'name-asc'
+                                                ? 'Name: A → Z'
+                                                : 'Name: Z → A'
+                                }
+                            </span>
                         </div>
 
                         <LuChevronDown
@@ -83,23 +119,31 @@ const ProjectsShow = () => {
                     </button>
 
                     <ul
-                        tabIndex={0}
+                        tabIndex={-1}
                         className="menu dropdown-content z-50 mt-2 w-80 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
                     >
                         <li>
-                            <button>Latest</button>
+                            <button onClick={() => handleFilterSort('latest')}>
+                                Latest
+                            </button>
                         </li>
 
                         <li>
-                            <button>Oldest</button>
+                            <button onClick={() => handleFilterSort('oldest')}>
+                                Oldest
+                            </button>
                         </li>
 
                         <li>
-                            <button>Name: A → Z</button>
+                            <button onClick={() => handleFilterSort('name-asc')}>
+                                Name: A → Z
+                            </button>
                         </li>
 
                         <li>
-                            <button>Name: Z → A</button>
+                            <button onClick={() => handleFilterSort('name-desc')}>
+                                Name: Z → A
+                            </button>
                         </li>
                     </ul>
                 </div>
