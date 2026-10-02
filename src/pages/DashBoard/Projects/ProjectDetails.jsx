@@ -5,13 +5,14 @@ import { useQuery } from '@tanstack/react-query';
 import { PiMemberOf } from 'react-icons/pi';
 import { LuCalendarDays, LuCheck, LuCircleUserRound, LuClock3, LuEllipsis, LuFileCode2, LuFlag, LuFolderKanban, LuListTodo, LuPencil, LuRocket, LuShare2, LuTag, LuTrash2, LuUsers } from 'react-icons/lu';
 import { Activity } from 'lucide-react';
+import Loading from '../../../Components/Loading/Loading.jsx';
 
 const ProjectDetails = () => {
     const { id } = useParams();
     const axiosSecure = UseAxiosSecures();
     // const [project, setProject] = useState([]);
     // get data for single project 
-    const {data:project } = useQuery({
+    const {data:project,isLoading } = useQuery({
         queryKey: ['project', id],
         queryFn: async () => {
             const res = await axiosSecure.get(`/projects/${id}`)
@@ -19,11 +20,28 @@ const ProjectDetails = () => {
             return res.data;
         }
     })
+    // const {createdAt,dueDate } = project;
+    if (isLoading) {
+        return <Loading></Loading>
+
+    }
     // useEffect(() => {
     //     const res = axiosSecure.get(`/dashboard/projects/${id}`)
     //     console.log(res)
     //     return res.data
     // },[id,axiosSecure])
+    // change data formate
+    const dateFormate = (date) => {
+        const formattedDate = new Date(date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        });
+
+        return formattedDate;
+        
+    }
+    
     return (
         <div>
             <h1>Project Details{ id}</h1>
@@ -48,24 +66,25 @@ const ProjectDetails = () => {
                             <div className="min-w-0">
 
                                 <h1 className="text-2xl font-bold text-base-content">
-                                    {name}
+                                    {project.name}
                                 </h1>
 
                                 <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
-                                    {/* {description} */}
+                                    {project.description }
                                 </p>
 
                                 {/* Tags */}
                                 <div className="mt-3 flex flex-wrap gap-2">
+                                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary" >
+                                        Frontend
+                                    </span>
+                                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary" >
+                                        React
+                                    </span>
+                                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary" >
+                                        Tailwind
+                                    </span>
 
-                                    {/* {tags.map((tag, index) => (
-                                        <span
-                                            key={index}
-                                            className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
-                                        >
-                                            {tag}
-                                        </span>
-                                    ))} */}
 
                                 </div>
 
@@ -77,22 +96,24 @@ const ProjectDetails = () => {
                         <div className="flex shrink-0 flex-col gap-4 lg:min-w-[280px]">
 
                             {/* Actions */}
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-between items-center gap-2">
 
                                 <span className="rounded-full bg-success/10 px-3 py-1 text-xs font-semibold capitalize text-success">
                                     <span className="mr-1 inline-block h-2 w-2 rounded-full bg-success"></span>
-                                    {status}
+                                    {project.status}
                                 </span>
 
-                                <button className="btn btn-sm border-base-300 bg-base-100">
-                                    <LuPencil size={15} />
-                                    Edit
-                                </button>
+                                <div>
+                                    <button className="btn btn-sm border-base-300 bg-base-100">
+                                        <LuPencil size={15} />
+                                        Edit
+                                    </button>
 
-                                <button className="btn btn-sm border-base-300 bg-base-100">
-                                    <LuEllipsis size={17} />
-                                </button>
+                                    <button className="btn btn-sm border-base-300 bg-base-100 ml-3">
+                                        <LuEllipsis size={17} />
+                                    </button>
 
+                                </div>
                             </div>
 
 
@@ -110,7 +131,7 @@ const ProjectDetails = () => {
                                 </div>
 
                                 <span className="text-right font-medium">
-                                    {/* {formattedCreatedDate} */}
+                                    {dateFormate(project.createdAt)}
                                 </span>
 
 
@@ -125,7 +146,7 @@ const ProjectDetails = () => {
                                 </div>
 
                                 <span className="text-right font-medium">
-                                    {/* {formattedDueDate} */}
+                                    {dateFormate(project.dueDate)}
                                 </span>
 
 
