@@ -14,15 +14,33 @@ const ProjectsShow = () => {
     // sorting filter
     const [sort, setSort] = useState('latest');
     //    use tanstack state data 
-    const { data:projects=[],isLoading,refetch} = useQuery({
-        queryKey: ['projects',search,status,sort],
+    const {
+        data = {
+            projects: [],
+            total: 0,
+            statusCounts: []
+        },
+        isLoading,
+        refetch
+    } = useQuery({
+        queryKey: ['projects', search, status, sort],
         queryFn: async () => {
-            const res = await axiosSecure.get(`/projects?searchText=${search}&status=${status}&sort=${sort}`);
-            // console.log(res);
+            const res = await axiosSecure.get(
+                `/projects?searchText=${search}&status=${status}&sort=${sort}`
+            );
+
             return res.data;
         }
-    })
+    });
 
+    const { projects, total, statusCounts } = data;
+    const getStatusCount = (statusName) => {
+        const item = statusCounts.find(
+            item => item.status === statusName
+        );
+
+        return item ? item.count : 0;
+    };
     // searchig handle  
     const handleSearchProjects = (e) => {
         const searching = e.target.value;
@@ -69,11 +87,11 @@ const ProjectsShow = () => {
                 {/* Button  */}
                 <div className='space-y-5 space-x-7 md:space-x-7 '>
                     <div className="indicator">
-                        <span className="indicator-item badge badge-secondary">12</span>
+                        <span className="indicator-item badge badge-secondary">{total}</span>
                         <button onClick={() => handleStatusProject('')} className={`btn ${status === '' ?'btn-primary' : 'bg-[#FEFFFE]'} rounded-xl`}>All Projects</button>
                     </div>
                     <div className="indicator">
-                        <span className="indicator-item badge badge-secondary">12</span>
+                        <span className="indicator-item badge badge-secondary">{getStatusCount('active')}</span>
                         <button onClick={() => handleStatusProject('active')} className={`btn ${status === 'active' ? 'btn-primary' : 'bg-[#FEFFFE]'} rounded-xl`}>Active</button>
                     </div>
                     <div className="indicator">
@@ -81,7 +99,7 @@ const ProjectsShow = () => {
                         <button className="btn bg-[#FEFFFE] rounded-xl">In Progress</button>
                     </div>
                     <div className="indicator">
-                        <span className="indicator-item badge badge-secondary">12</span>
+                        <span className="indicator-item badge badge-secondary">{getStatusCount('completed')}</span>
                         <button onClick={() => handleStatusProject('completed')} className={`btn ${status === 'completed' ? 'btn-primary' : 'bg-[#FEFFFE]'} rounded-xl`}>Completed</button>
                     </div>
                 </div>

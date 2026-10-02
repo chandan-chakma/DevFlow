@@ -12,6 +12,7 @@ import Team from "../pages/DashBoard/Team/Team.jsx";
 import Calendar from "../pages/DashBoard/Calendar/Calendar.jsx";
 import Analytics from "../pages/DashBoard/Analytics/Analytics.jsx";
 import Settings from "../pages/DashBoard/Settings/Settings.jsx";
+import ProjectDetails from "../pages/DashBoard/Projects/ProjectDetails.jsx";
 
 export const router = createBrowserRouter([
     {
@@ -51,6 +52,11 @@ export const router = createBrowserRouter([
             {
                 path: '/dashboard/projects',
                 Component: Projects
+            },
+            {
+                path: '/dashboard/projects/:id',
+                Component:ProjectDetails
+
             },
             {
                 path: '/dashboard/tasks',
