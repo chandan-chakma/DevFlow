@@ -1,8 +1,20 @@
 import { LucideMoreHorizontal } from 'lucide-react';
-import React, { useState } from 'react';
-import { LuCalendarDays, LuCheck, LuChevronDown, LuCircle, LuCircleDot, LuDownload, LuFileImage, LuFlag, LuMessageCircle, LuPaperclip, LuPlus, LuSearch, LuSend, LuTag, LuUsers, LuX } from 'react-icons/lu';
+import React, { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { LuCalendarDays, LuCheck, LuChevronDown, LuCircle, LuCircleDot, LuDownload, LuFileImage, LuFlag, LuFolderPlus, LuLightbulb, LuMessageCircle, LuPaperclip, LuPlus, LuSearch, LuSend, LuTag, LuUsers, LuX } from 'react-icons/lu';
+import { RiProjector2Line } from 'react-icons/ri';
 
-const ProjectDetailsTask = () => {
+const ProjectDetailsTask = ({project}) => {
+    const openaddTaskModalRef = useRef();
+    const handleAddTaskModal = () => {
+        openaddTaskModalRef.current.showModal();
+    }
+
+    const { register, handleSubmit, formState:{ errors } } = useForm()
+    
+    const onSubmit = () => {
+        console.log('hello')
+    }
     // ---------------------------------------------------------
     // Selected task
     // ---------------------------------------------------------
@@ -859,13 +871,226 @@ const ProjectDetailsTask = () => {
 
                                 {/* Add Task */}
 
-                                <button className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-content shadow-sm transition hover:bg-accent-content">
+                                <button onClick={handleAddTaskModal} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-content shadow-sm transition hover:bg-accent-content">
 
                                     <LuPlus size={17} />
 
                                     Add Task
 
                                 </button>
+
+                                {/* add task Modal  */}
+                                {/* Open the modal using document.getElementById('ID').showModal() method */}
+                                {/* <button className="btn" onClick={() => document.getElementById('my_modal_5').showModal()}>open modal</button> */}
+                                <dialog ref={openaddTaskModalRef} className="modal modal-bottom sm:modal-middle">
+                                    <div className="modal-box max-w-2xl">
+                                        <div className="flex items-start justify-between px-7 pt-7">
+                                            <div className="flex items-center gap-4">
+
+                                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
+                                                    <LuFolderPlus size={28} />
+                                                </div>
+
+                                                <div>
+                                                    <h2 className="text-2xl font-bold text-base-content">
+                                                        Create New Project
+                                                    </h2>
+
+                                                    <p className="mt-1 text-sm text-muted">
+                                                        Fill in the details below to create a new project.
+                                                    </p>
+                                                </div>
+
+                                            </div>
+                                            <div className="">
+                                                <form method="dialog">
+                                                    {/* if there is a button in form, it will close the modal */}
+                                                    <button
+                                                        className="btn rounded-lg p-2 text-slate-400 transition hover:bg-base-200 hover:text-base-content"
+                                                    >
+                                                        <LuX size={18} />
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+
+
+                                        <form onSubmit={handleSubmit(onSubmit)}>
+                                            <div className="space-y-6 px-7 py-6">
+
+                                                {/* Project Name */}
+                                                <div>
+                                                    <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                        Project Name <span className="text-error">*</span>
+                                                    </label>
+
+                                                    <div className="relative">
+
+                                                        <RiProjector2Line
+                                                            size={20}
+                                                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                                        />
+
+                                                        <input
+                                                            type="text"
+                                                            placeholder="e.g. DevFlow Web App"
+                                                            className={`input h-10 w-full rounded-xl border bg-base-100 pl-12 pr-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 ${errors.name
+                                                                ? "border-error"
+                                                                : "border-base-300"
+                                                                }`}
+                                                            {...register("name", {
+                                                                required: "Project name is required",
+                                                                minLength: {
+                                                                    value: 3,
+                                                                    message:
+                                                                        "Project name must be at least 3 characters",
+                                                                },
+                                                            })}
+                                                        />
+
+                                                    </div>
+
+                                                    {errors.name && (
+                                                        <p className="mt-1.5 text-sm text-error">
+                                                            {errors.name.message}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {/* Description */}
+                                                <div>
+                                                    <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                        Description <span className="text-error">*</span>
+                                                    </label>
+
+                                                    <div className="relative">
+
+                                                        <LuFolderPlus
+                                                            size={20}
+                                                            className="absolute left-4 top-5 text-slate-400"
+                                                        />
+
+                                                        <textarea
+                                                            rows={4}
+                                                            maxLength={500}
+                                                            placeholder="Describe your project, goals and objectives..."
+                                                            className={`textarea min-h-32 w-full resize-none rounded-xl border bg-base-100 pl-12 pr-4 pt-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 ${errors.description
+                                                                ? "border-error"
+                                                                : "border-base-300"
+                                                                }`}
+                                                            {...register("description", {
+                                                                required: "Project description is required",
+                                                                maxLength: {
+                                                                    value: 500,
+                                                                    message:
+                                                                        "Description cannot exceed 500 characters",
+                                                                },
+                                                            })}
+                                                        />
+
+                                                    </div>
+
+                                                    {errors.description && (
+                                                        <p className="mt-1.5 text-sm text-error">
+                                                            {errors.description.message}
+                                                        </p>
+                                                    )}
+
+                                                    <p className="mt-1 text-right text-xs text-muted">
+                                                        Maximum 500 characters
+                                                    </p>
+                                                </div>
+
+                                                {/* Status + Due Date */}
+                                                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                                                    {/* Status */}
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                            Status
+                                                        </label>
+
+                                                        <div className="relative">
+
+                                                            <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
+
+                                                            <select
+                                                                className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                                {...register("status")}
+                                                            >
+                                                                <option value="active">
+                                                                    To Do
+                                                                </option>
+
+                                                                <option value="planning">
+                                                                    In Progress
+                                                                </option>
+
+                                                                <option value="on-hold">
+                                                                    Done
+                                                                </option>
+{/* 
+                                                                <option value="completed">
+                                                                    Completed
+                                                                </option> */}
+                                                            </select>
+
+                                                            <LuChevronDown
+                                                                size={20}
+                                                                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                                            />
+
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Due Date */}
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                            Due Date
+                                                        </label>
+
+                                                        <div className="relative">
+
+                                                            <LuCalendarDays
+                                                                size={20}
+                                                                className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400"
+                                                            />
+
+                                                            <input
+                                                                type="date"
+                                                                className="input h-10 w-full rounded-xl border border-base-300 bg-base-100 pl-12 pr-4 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                                {...register("dueDate")}
+                                                            />
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                            {/* Footer */}
+                                            <div className="flex justify-end gap-3 border-t border-base-300 px-7 py-5">
+                                                <form method="dialog">
+                                                    <button
+                                                        className="h-12 rounded-xl border border-base-300 bg-base-100 px-7 font-semibold text-slate-600 transition hover:bg-base-200"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </form>
+
+
+                                                <button
+                                                    type="submit"
+                                                    className="h-12 rounded-xl bg-primary px-7 font-semibold text-white shadow-sm transition hover:bg-[#4525D9] hover:shadow-md"
+                                                >
+                                                    Create Task
+                                                </button>
+
+                                            </div>
+
+                                        </form>
+                                    </div>
+                                </dialog>
 
                             </div>
 

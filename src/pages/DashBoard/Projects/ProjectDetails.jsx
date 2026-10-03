@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 import { useQuery } from '@tanstack/react-query';
 import { PiMemberOf } from 'react-icons/pi';
-import { LuCalendarDays, LuCheck, LuCircleUserRound, LuClock3, LuEllipsis, LuFileCode2, LuFlag, LuFolderKanban, LuListTodo, LuPencil, LuRocket, LuShare2, LuTag, LuTrash2, LuUsers } from 'react-icons/lu';
+import { LuCalendarDays, LuCircleUserRound, LuClock3, LuEllipsis, LuFlag, LuFolderKanban, LuListTodo, LuPencil, LuRocket, LuUsers } from 'react-icons/lu';
 import { Activity } from 'lucide-react';
 import Loading from '../../../Components/Loading/Loading.jsx';
 import ProjectDetailsOverview from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsOverview.jsx';
@@ -200,12 +200,16 @@ const ProjectDetails = () => {
 
                     <div className="flex overflow-x-auto">
 
-                        <button onClick={()=>setActiveTab('overview')} className="flex items-center gap-2 border-b-2 border-primary px-5 py-3 text-sm font-semibold text-primary">
+                        <button onClick={() => setActiveTab('overview')} className={`flex items-center gap-2 border-b-2  px-5 py-3 text-sm font-medium text-muted ${activeTab === 'overview'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-muted hover:border-primary hover:text-primary'}`}>
                             <LuFolderKanban size={17} />
                             Overview
                         </button>
 
-                        <button onClick={()=>setActiveTab('task')} className="flex items-center gap-2 border-b-2 border-transparent px-5 py-3 text-sm font-medium text-muted hover:text-base-content">
+                        <button onClick={() => setActiveTab('task')} className={`flex items-center gap-2 border-b-2  px-5 py-3 text-sm font-medium text-muted ${activeTab === 'task'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-muted hover:border-primary hover:text-primary'}`}>
                             <LuListTodo size={17} />
                             Tasks
                             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
@@ -213,7 +217,9 @@ const ProjectDetails = () => {
                             </span>
                         </button>
 
-                        <button className="flex items-center gap-2 border-b-2 border-transparent px-5 py-3 text-sm font-medium text-muted hover:text-base-content">
+                        <button onClick={() => setActiveTab('members')} className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium text-muted ${activeTab === 'members'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-muted hover:border-primary hover:text-primary'}`}>
                             <LuUsers size={17} />
                             Members
 
@@ -222,7 +228,9 @@ const ProjectDetails = () => {
                             </span>
                         </button>
 
-                        <button className="flex items-center gap-2 border-b-2 border-transparent px-5 py-3 text-sm font-medium text-muted hover:text-base-content">
+                        <button onClick={() => setActiveTab('activity')} className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium text-muted ${activeTab === 'activity'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-muted hover:border-primary hover:text-primary'}hover:text-base-content`}>
                             <LuClock3 size={17} />
                             Activity
                         </button>
@@ -243,6 +251,16 @@ const ProjectDetails = () => {
                 }
                 {
                     activeTab === 'task' && (
+                        <ProjectDetailsTask project={project}></ProjectDetailsTask>
+                    )
+                }
+                {
+                    activeTab === 'members' && (
+                        <ProjectDetailsTask project={project}></ProjectDetailsTask>
+                    )
+                }
+                {
+                    activeTab === 'activity' && (
                         <ProjectDetailsTask project={project}></ProjectDetailsTask>
                     )
                 }
