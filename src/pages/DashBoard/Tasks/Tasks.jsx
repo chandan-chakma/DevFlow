@@ -1,9 +1,10 @@
 import React from 'react';
+import TaskOverview from '../../../Components/DashboardComponent/TaskComponent/TaskOverview.jsx';
 
 const Tasks = () => {
     return (
         <div>
-            <h1>Task</h1>
+            <TaskOverview></TaskOverview>
         </div>
     );
 };

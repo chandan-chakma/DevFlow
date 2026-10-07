@@ -1,10 +1,18 @@
 import { LucideMoreHorizontal } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { FaRegFlag } from 'react-icons/fa';
 import { LuCalendarDays, LuCheck, LuChevronDown, LuCircle, LuCircleDot, LuDownload, LuFileImage, LuFlag, LuFolderPlus, LuLightbulb, LuMessageCircle, LuPaperclip, LuPlus, LuSearch, LuSend, LuTag, LuUsers, LuX } from 'react-icons/lu';
 import { RiProjector2Line } from 'react-icons/ri';
+import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import Swal from 'sweetalert2';
 
-const ProjectDetailsTask = ({project}) => {
+const ProjectDetailsTask = ({ project }) => {
+    // console.log(project)
+    const { _id:id } = project
+    // console.log(_id)
+    const axiosSecure = UseAxiosSecures();
     const openaddTaskModalRef = useRef();
     const handleAddTaskModal = () => {
         openaddTaskModalRef.current.showModal();
@@ -12,8 +20,40 @@ const ProjectDetailsTask = ({project}) => {
 
     const { register, handleSubmit, formState:{ errors } } = useForm()
     
-    const onSubmit = () => {
-        console.log('hello')
+    // using tanstak library usemutation for refetch ui
+    const queryClient = useQueryClient();
+    const postTaskMutation = useMutation({
+        mutationFn: async (postTask) => {
+            const res = await axiosSecure.post(`/projects/${id}/tasks`,postTask)
+            // console.log(res);
+            return res.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({
+                queryKey:['project-tasks',id]
+            })
+            if (data.insertedId) {
+                Swal.fire({
+                    title: "Your project successfully created!",
+                    icon: "success",
+                    draggable: true,
+                    timer: 2500
+                });
+            }
+        },
+        onError: (error) => {
+            Swal.fire({
+                title: "Failed to create project",
+                text: "Something went wrong.",
+                icon: "error"
+            });
+
+                    
+        }
+    })
+    const onSubmit = (data) => {
+        console.log(data)
+        postTaskMutation.mutate(data)
     }
     // ---------------------------------------------------------
     // Selected task
@@ -893,11 +933,11 @@ const ProjectDetailsTask = ({project}) => {
 
                                                 <div>
                                                     <h2 className="text-2xl font-bold text-base-content">
-                                                        Create New Project
+                                                        Create New Task
                                                     </h2>
 
                                                     <p className="mt-1 text-sm text-muted">
-                                                        Fill in the details below to create a new project.
+                                                        Fill in the details below to create a new task.
                                                     </p>
                                                 </div>
 
@@ -921,25 +961,25 @@ const ProjectDetailsTask = ({project}) => {
                                                 {/* Project Name */}
                                                 <div>
                                                     <label className="mb-2 block text-sm font-semibold text-base-content">
-                                                        Project Name <span className="text-error">*</span>
+                                                        Task Name <span className="text-error">*</span>
                                                     </label>
 
                                                     <div className="relative">
 
                                                         <RiProjector2Line
                                                             size={20}
-                                                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                                            className="absolute left-4 top-1/2 -translate-y-1/2 z-5 text-slate-400"
                                                         />
 
                                                         <input
                                                             type="text"
-                                                            placeholder="e.g. DevFlow Web App"
-                                                            className={`input h-10 w-full rounded-xl border bg-base-100 pl-12 pr-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 ${errors.name
+                                                            placeholder="e.g. Build authentication system"
+                                                            className={`input h-10 w-full rounded-xl border bg-base-100 pl-12 pr-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 ${errors.title
                                                                 ? "border-error"
                                                                 : "border-base-300"
                                                                 }`}
-                                                            {...register("name", {
-                                                                required: "Project name is required",
+                                                            {...register("title", {
+                                                                required: "Task name is required",
                                                                 minLength: {
                                                                     value: 3,
                                                                     message:
@@ -1007,27 +1047,29 @@ const ProjectDetailsTask = ({project}) => {
                                                     {/* Status */}
                                                     <div>
                                                         <label className="mb-2 block text-sm font-semibold text-base-content">
-                                                            Status
+                                                            Priority <span className="text-error">*</span>
                                                         </label>
 
-                                                        <div className="relative">
-
-                                                            <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
+                                                        <div className="relative text-warning">
+                                                            <FaRegFlag
+                                                                size={20}
+                                                                className="absolute left-4 top-1/2 -translate-y-1/2 z-5 text-slate-400 text-warning"
+                                                            />
 
                                                             <select
                                                                 className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-                                                                {...register("status")}
+                                                                {...register("priority")}
                                                             >
                                                                 <option value="active">
-                                                                    To Do
+                                                                    High
                                                                 </option>
 
                                                                 <option value="planning">
-                                                                    In Progress
+                                                                    Medium
                                                                 </option>
 
                                                                 <option value="on-hold">
-                                                                    Done
+                                                                    Low
                                                                 </option>
 {/* 
                                                                 <option value="completed">
@@ -1066,6 +1108,44 @@ const ProjectDetailsTask = ({project}) => {
                                                     </div>
 
                                                 </div>
+                                                <div>
+                                                    <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                        Status
+                                                    </label>
+
+                                                    <div className="relative">
+
+                                                        <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
+
+                                                        <select
+                                                            className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                            {...register("status")}
+                                                        >
+                                                            <option value="To Do">
+                                                                To Do
+                                                            </option>
+
+                                                            <option value="In Progress">
+                                                                In Progress
+                                                            </option>
+
+                                                            <option value="Done">
+                                                                Done
+                                                            </option>
+
+                                                            <option value="Completed">
+                                                                Completed
+                                                            </option>
+                                                        </select>
+
+                                                        <LuChevronDown
+                                                            size={20}
+                                                            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                                        />
+
+                                                    </div>
+                                                </div>
+                                                
 
                                             </div>
                                             {/* Footer */}

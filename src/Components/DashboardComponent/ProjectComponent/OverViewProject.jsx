@@ -52,8 +52,8 @@ const OverViewProject = () => {
                 text: "Something went wrong.",
                 icon: "error"
             });
-            
-        }
+        },
+        
     })
 
     const onSubmit = (data) => {
