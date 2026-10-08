@@ -34,7 +34,7 @@ const ProjectDetailsTask = ({ project }) => {
             })
             if (data.insertedId) {
                 Swal.fire({
-                    title: "Your project successfully created!",
+                    title: "Task successfully created!",
                     icon: "success",
                     draggable: true,
                     timer: 2500
@@ -52,8 +52,9 @@ const ProjectDetailsTask = ({ project }) => {
         }
     })
     const onSubmit = (data) => {
-        console.log(data)
-        postTaskMutation.mutate(data)
+        // console.log(data)
+        postTaskMutation.mutate(data);
+        openaddTaskModalRef.current.close()
     }
     // ---------------------------------------------------------
     // Selected task
