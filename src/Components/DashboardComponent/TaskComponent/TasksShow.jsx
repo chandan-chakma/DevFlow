@@ -1,12 +1,27 @@
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import React, { useState } from 'react';
 import { LuArrowDownUp, LuChevronDown } from 'react-icons/lu';
+import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
+import TaskCard from './TaskCard.jsx';
 
 const TasksShow = () => {
-
+    const axiosSecure = UseAxiosSecures();
     // for search project 
     const [search, setSearch] = useState('');
     // for filtering button
-      const [sort, setSort] = useState('latest');
+    const [sort, setSort] = useState('latest');
+    
+
+    //    use tanstack state data  get task data
+    const {data:tasks=[] } = useQuery({
+        queryKey:['tasks'],
+        queryFn: async () => {
+            const res = await axiosSecure.get('/tasks')
+            console.log(res)
+            return res.data
+        }
+    })
 
 
     // const getStatusCount = (statusName) => {
@@ -22,6 +37,14 @@ const TasksShow = () => {
         // console.log(searching)
         setSearch(searching);
     }
+        // change date format 
+    const formatDate = (date) => {
+        return new Date(date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        });
+    };
 
 
 
@@ -294,12 +317,68 @@ const TasksShow = () => {
                 
             </div>
 
-            <div className='grid grid-cols-1  md:grid-cols-3 gap-5'>
-                {/* {
-                    projects.map(project => <ProjectCard key={project._id} project={project} refetch={refetch}>
-                    </ProjectCard>)
+            <div className='mt-5'>
+                <div className="overflow-x-auto">
+                    <table className="table">
+                        {/* head */}
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label>
+                                        <input type="checkbox" className="checkbox" />
+                                    </label>
+                                </th>
+                                <th>Task</th>
+                                <th>Project</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Due Date</th>
+                                <th>Assignee</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-                } */}
+                            {
+                                tasks.map(task =>
+                                    <tr key={ task._id}>
+                                        <th>
+                                            <label>
+                                                <input type="checkbox" className="checkbox" />
+                                            </label>
+                                        </th>
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <div className="avatar">
+                                                    <div className="mask mask-squircle h-12 w-12">
+                                                        <img
+                                                            src="https://img.daisyui.com/images/profile/demo/2@94.webp"
+                                                            alt="Avatar Tailwind CSS Component" />
+                                                    </div>
+                                                </div>
+                                                <div className='min-w-0'>
+                                                    <div className="font-bold">{task.title}</div>
+                                                    <div className="w-80 truncate text-sm opacity-50">{task.description}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                           {task.projectName}
+                                        </td>
+                                        <td>{task.status}</td>
+                                        <td>{task.priority}</td>
+                                        <td>{formatDate(task.dueDate)}</td>
+                                        <th>
+                                            <button className="btn btn-ghost btn-xs">details</button>
+                                        </th>
+                                    </tr>
+                                )
+                            }
+
+                        </tbody>
+
+                    </table>
+                </div>
 
             </div>
         </div>
