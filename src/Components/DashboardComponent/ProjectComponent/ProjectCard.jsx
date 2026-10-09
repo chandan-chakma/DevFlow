@@ -59,69 +59,70 @@ const ProjectCard = ({ project,refetch }) => {
 
     return (
         <div>
-            <Link to={`/dashboard/projects/${_id}`}>
-                <div className="w-full max-w-xl rounded-2xl border border-base-300 bg-base-100 p-7 shadow-sm transition-shadow duration-200 hover:shadow-md">
+            <div className="w-full max-w-xl rounded-2xl border border-base-300 bg-base-100 p-7 shadow-sm transition-shadow duration-200 hover:shadow-md">
 
-                    {/* Top section */}
-                    <div className="flex items-start justify-between">
+                {/* Top section */}
+                <div className="flex items-start justify-between">
 
-                        {/* Project icon */}
-                        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#EEE9FF]">
-                            <LuFileCode2
-                                size={42}
-                                strokeWidth={2.5}
-                                className="text-primary"
-                            />
-                        </div>
-
-                        {/* Right side */}
-                        <div className="flex flex-col items-end gap-4">
-
-                            {/* More button */}
-                            <div className="dropdown dropdown-end">
-                                <button
-                                    tabIndex={0}
-                                    type="button"
-                                    className="rounded-lg p-1.5 text-slate-500 transition hover:bg-base-200 hover:text-base-content"
-                                >
-                                    <LuEllipsis size={23} />
-                                </button>
-
-                                <ul
-                                    tabIndex={-1}
-                                    className="menu dropdown-content z-50 mt-2 w-40 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
-                                >
-                                    <li>
-                                        <button type="button">
-                                            View
-                                        </button>
-                                    </li>
-
-                                    <li>
-                                        <button type="button">
-                                            Edit
-                                        </button>
-                                    </li>
-
-                                    <li>
-                                        <button onClick={() => handleDeleteProject(_id)}
-                                            type="button"
-                                            className="text-error"
-                                        >
-                                            Delete
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            {/* Status */}
-                            <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-500">
-                                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
-                                {status}
-                            </span>
-
-                        </div>
+                    {/* Project icon */}
+                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#EEE9FF]">
+                        <LuFileCode2
+                            size={42}
+                            strokeWidth={2.5}
+                            className="text-primary"
+                        />
                     </div>
+
+                    {/* Right side */}
+                    <div className="flex flex-col items-end gap-4">
+
+                        {/* More button */}
+                        <div className="dropdown dropdown-end">
+                            <button
+                                tabIndex={0}
+                                type="button"
+                                className="rounded-lg p-1.5 text-slate-500 transition hover:bg-base-200 hover:text-base-content"
+                            >
+                                <LuEllipsis size={23} />
+                            </button>
+
+                            <ul
+                                tabIndex={-1}
+                                className="menu dropdown-content z-50 mt-2 w-40 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
+                            >
+                                <li>
+                                    <button type="button">
+                                        View
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button type="button">
+                                        Edit
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button onClick={() => handleDeleteProject(_id)}
+                                        type="button"
+                                        className="text-error"
+                                    >
+                                        Delete
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Status */}
+                        <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-500">
+                            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                            {status}
+                        </span>
+
+                    </div>
+                </div>
+
+                <Link to={`/dashboard/projects/${_id}`}>
 
                     {/* Project information */}
                     <div className="mt-5">
@@ -224,9 +225,12 @@ const ProjectCard = ({ project,refetch }) => {
                         </div>
 
                     </div>
+                </Link>
 
-                </div>
-            </Link>
+            </div>
+            
+               
+           
         </div>
     );
 };

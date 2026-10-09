@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import React, { useState } from 'react';
-import { LuArrowDownUp, LuChevronDown } from 'react-icons/lu';
+import { LuArrowDownUp, LuChevronDown, LuEllipsis } from 'react-icons/lu';
 import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
-import TaskCard from './TaskCard.jsx';
+import Swal from 'sweetalert2';
 
 const TasksShow = () => {
     const axiosSecure = UseAxiosSecures();
@@ -18,10 +18,25 @@ const TasksShow = () => {
         queryKey:['tasks'],
         queryFn: async () => {
             const res = await axiosSecure.get('/tasks')
-            console.log(res)
+            // console.log(res)
             return res.data
         }
     })
+
+    // delete task mutation 
+     const queryClient = useQueryClient()
+    const deleteTaskMutation = useMutation({
+        mutationFn: async (id) => {
+            const res = await axiosSecure.delete(`/tasks/${id}`)
+            // console.log(res)
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] })
+        }
+    })
+
+
 
 
     // const getStatusCount = (statusName) => {
@@ -37,6 +52,29 @@ const TasksShow = () => {
         // console.log(searching)
         setSearch(searching);
     }
+
+    // delete Task 
+    const handleDeleteTask = (id) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteTaskMutation.mutate(id)
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Your file has been deleted.",
+                    icon: "success"
+                });
+            }
+        });                    
+    }
+
         // change date format 
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString("en-US", {
@@ -358,18 +396,83 @@ const TasksShow = () => {
                                                 </div>
                                                 <div className='min-w-0'>
                                                     <div className="font-bold">{task.title}</div>
-                                                    <div className="w-80 truncate text-sm opacity-50">{task.description}</div>
+                                                    <div className="w-72 truncate text-sm opacity-50">{task.description}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
                                            {task.projectName}
                                         </td>
-                                        <td>{task.status}</td>
-                                        <td>{task.priority}</td>
+                                        <td>
+                                            <span className={`p-2 rounded-lg ${task.status === 'To Do'
+                                                ? 'bg-[#FEE1E4] text-error'
+                                                    : task.status === 'In Progress'
+                                                    ? 'bg-[#DEEDFE] text-info'
+                                                        : task.status === 'Done'
+                                                        ? 'bg-[#DDF6F2] text-success'
+                                                            : ''
+                                                }`}>
+                                                {task.status}
+
+                                            </span>
+                                            
+                                        </td>
+                                        <td>
+                                            <span className={`p-2 rounded-lg ${task.priority === 'High'
+                                                ? 'bg-[#FEE1E4] text-error'
+                                                : task.priority === 'Medium'
+                                                    ? 'bg-[#FFEFD8] text-warning'
+                                                    : task.priority === 'Done'
+                                                        ? 'bg-[#DDF6F2] text-success'
+                                                        : ''
+                                                }`}>
+                                                {task.priority}
+
+                                            </span>
+                                        </td>
                                         <td>{formatDate(task.dueDate)}</td>
+                                        <td>
+                                            
+                                        </td>
                                         <th>
-                                            <button className="btn btn-ghost btn-xs">details</button>
+                                            {/* More button */}
+                                            <div className="dropdown dropdown-end">
+                                                <button
+                                                    tabIndex={0}
+                                                    type="button"
+                                                    className="rounded-lg p-1.5 text-slate-500 transition hover:bg-base-200 hover:text-base-content"
+                                                >
+                                                    <LuEllipsis size={23} />
+                                                </button>
+
+                                                <ul
+                                                    tabIndex={-1}
+                                                    className="menu dropdown-content z-50 mt-2 w-40 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
+                                                >
+                                                    <li>
+                                                        <button type="button">
+                                                            View
+                                                        </button>
+                                                    </li>
+
+                                                    <li>
+                                                        <button type="button">
+                                                            Edit
+                                                        </button>
+                                                    </li>
+
+                                                    <li>
+                                                        <button onClick={()=>handleDeleteTask(task._id)}
+                                                            type="button"
+                                                            className="text-error"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            
+                                                                   
                                         </th>
                                     </tr>
                                 )

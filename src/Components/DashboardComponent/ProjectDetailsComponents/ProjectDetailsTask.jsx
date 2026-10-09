@@ -1045,7 +1045,7 @@ const ProjectDetailsTask = ({ project }) => {
                                                 {/* Status + Due Date */}
                                                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
-                                                    {/* Status */}
+                                                    {/* Priority */}
                                                     <div>
                                                         <label className="mb-2 block text-sm font-semibold text-base-content">
                                                             Priority <span className="text-error">*</span>
@@ -1061,15 +1061,15 @@ const ProjectDetailsTask = ({ project }) => {
                                                                 className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                                                                 {...register("priority")}
                                                             >
-                                                                <option value="active">
+                                                                <option value="High">
                                                                     High
                                                                 </option>
 
-                                                                <option value="planning">
+                                                                <option value="Medium">
                                                                     Medium
                                                                 </option>
 
-                                                                <option value="on-hold">
+                                                                <option value="Low">
                                                                     Low
                                                                 </option>
 {/* 
