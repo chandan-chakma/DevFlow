@@ -9,15 +9,18 @@ const TasksShow = () => {
     const axiosSecure = UseAxiosSecures();
     // for search project 
     const [search, setSearch] = useState('');
+    
     // for filtering button
+    const [status, setStatus] = useState('');
+    const [priority, setPriority] = useState('');
     const [sort, setSort] = useState('latest');
     
 
     //    use tanstack state data  get task data
     const {data:tasks=[] } = useQuery({
-        queryKey:['tasks',search],
+        queryKey:['tasks',search,status,priority,sort],
         queryFn: async () => {
-            const res = await axiosSecure.get(`/tasks?searchText=${search}`)
+            const res = await axiosSecure.get(`/tasks?searchText=${search}&status=${status}&priority=${priority}&sort={sort}`)
             // console.log(res)
             return res.data
         }
@@ -49,7 +52,7 @@ const TasksShow = () => {
     // searchig handle  
     const handleSearchTasks = (e) => {
         const searching = e.target.value;
-        console.log(searching)
+        // console.log(searching)
         setSearch(searching);
     }
 
@@ -92,7 +95,7 @@ const TasksShow = () => {
 
             <div className='flex flex-col md:flex-row justify-around gap-5 my-8'>
                 {/* searching project  */}
-                <div className="">
+                <div className="flex-1">
                     <label className="input rounded-lg">
                         <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <g
@@ -110,8 +113,8 @@ const TasksShow = () => {
                     </label>
                 </div>
 
-                <div className='grid grid-cols-4 gap-2'>
-                    {/* Sort by project  */}
+                <div className='flex items-center gap-5'>
+                    {/* Sort by task status */}
                     <div className="dropdown ">
                         <button
                             tabIndex={0}
@@ -123,7 +126,7 @@ const TasksShow = () => {
                                     size={18}
                                     className="text-slate-500"
                                 />
-                                All Projects
+                                {status ===''?'All Tasks': status}
                             </div>
 
                             <LuChevronDown
@@ -137,77 +140,26 @@ const TasksShow = () => {
                             className="menu dropdown-content z-50 mt-2 w-40 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
                         >
                             <li>
-                                <button>
-                                    Latest
+                                <button onClick={()=>setStatus('')}>
+                                    All Tasks
                                 </button>
                             </li>
 
                             <li>
-                                <button>
-                                    Oldest
+                                <button onClick={()=>setStatus('To Do')}>
+                                    To Do
                                 </button>
                             </li>
 
                             <li>
-                                <button>
-                                    Name: A → Z
+                                <button onClick={()=>setStatus('In Progress')}>
+                                    In Progress
                                 </button>
                             </li>
 
                             <li>
-                                <button>
-                                    Name: Z → A
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* Sort by status  */}
-                    <div className="dropdown ">
-                        <button
-                            tabIndex={0}
-                            role="button"
-                            className="flex h-10 w-50 items-center justify-between rounded-xl border border-base-300 bg-base-100 px-3 text-lg font-semibold text-slate-500 shadow-sm hover:bg-base-200"
-                        >
-                            <div className="flex items-center gap-2 text-sm">
-                                <LuArrowDownUp
-                                    size={18}
-                                    className="text-slate-500"
-                                />
-                                All Status
-                            </div>
-
-                            <LuChevronDown
-                                size={18}
-                                className="text-slate-500"
-                            />
-                        </button>
-
-                        <ul
-                            tabIndex={-1}
-                            className="menu dropdown-content z-50 mt-2 w-40 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
-                        >
-                            <li>
-                                <button>
-                                    Latest
-                                </button>
-                            </li>
-
-                            <li>
-                                <button>
-                                    Oldest
-                                </button>
-                            </li>
-
-                            <li>
-                                <button>
-                                    Name: A → Z
-                                </button>
-                            </li>
-
-                            <li>
-                                <button>
-                                    Name: Z → A
+                                <button onClick={()=>setStatus('Done')}>
+                                    Done
                                 </button>
                             </li>
                         </ul>
@@ -225,7 +177,7 @@ const TasksShow = () => {
                                     size={18}
                                     className="text-slate-500"
                                 />
-                                All Priority
+                                {priority===''?'All Priority':priority}
                             </div>
 
                             <LuChevronDown
@@ -239,28 +191,28 @@ const TasksShow = () => {
                             className="menu dropdown-content z-50 mt-2 w-40 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
                         >
                             <li>
-                                <button>
-                                    Latest
+                                <button onClick={() => setPriority('')}>
+                                    All Priority
+                                </button>
+                            </li>
+                            <li>
+                                <button onClick={()=>setPriority('High')}>
+                                    High
                                 </button>
                             </li>
 
                             <li>
-                                <button>
-                                    Oldest
+                                <button onClick={()=>setPriority("Medium")}>
+                                    Medium
                                 </button>
                             </li>
 
                             <li>
-                                <button>
-                                    Name: A → Z
+                                <button onClick={()=>setPriority('Low')}>
+                                    Low
                                 </button>
                             </li>
 
-                            <li>
-                                <button>
-                                    Name: Z → A
-                                </button>
-                            </li>
                         </ul>
                     </div>
 
@@ -276,7 +228,9 @@ const TasksShow = () => {
                                     size={18}
                                     className="text-slate-500"
                                 />
-                                Sort by:
+                                Sort by:{
+                                    sort==='latest'?'latest':sort
+                                }
                             </div>
 
                             <LuChevronDown
@@ -290,26 +244,20 @@ const TasksShow = () => {
                             className="menu dropdown-content z-50 mt-2 w-40 rounded-xl border border-base-300 bg-base-100 p-2 shadow-lg"
                         >
                             <li>
-                                <button>
+                                <button onClick={()=>setSort('latest')}>
                                     Latest
                                 </button>
                             </li>
 
                             <li>
-                                <button>
+                                <button onClick={()=>setSort('oldest')}>
                                     Oldest
                                 </button>
                             </li>
 
                             <li>
-                                <button>
-                                    Name: A → Z
-                                </button>
-                            </li>
-
-                            <li>
-                                <button>
-                                    Name: Z → A
+                                <button onClick={() => setSort('due-asc')}>
+                                    DueDate
                                 </button>
                             </li>
                         </ul>
