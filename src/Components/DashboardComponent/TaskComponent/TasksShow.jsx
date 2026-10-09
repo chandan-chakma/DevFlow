@@ -15,9 +15,9 @@ const TasksShow = () => {
 
     //    use tanstack state data  get task data
     const {data:tasks=[] } = useQuery({
-        queryKey:['tasks'],
+        queryKey:['tasks',search],
         queryFn: async () => {
-            const res = await axiosSecure.get('/tasks')
+            const res = await axiosSecure.get(`/tasks?searchText=${search}`)
             // console.log(res)
             return res.data
         }
@@ -49,7 +49,7 @@ const TasksShow = () => {
     // searchig handle  
     const handleSearchTasks = (e) => {
         const searching = e.target.value;
-        // console.log(searching)
+        console.log(searching)
         setSearch(searching);
     }
 
@@ -378,7 +378,13 @@ const TasksShow = () => {
                         <tbody>
 
                             {
-                                tasks.map(task =>
+                                tasks.length === 0 ?
+                                    (<tr>
+                                        <td colSpan="7" className="py-10 text-center text-2xl text-error">
+                                            No task found
+                                        </td>
+                                    </tr>):
+                                (tasks.map(task =>
                                     <tr key={ task._id}>
                                         <th>
                                             <label>
@@ -475,7 +481,7 @@ const TasksShow = () => {
                                                                    
                                         </th>
                                     </tr>
-                                )
+                                ))
                             }
 
                         </tbody>
