@@ -1,12 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import React, { useState } from 'react';
-import { LuArrowDownUp, LuChevronDown, LuEllipsis } from 'react-icons/lu';
+import React, { useRef, useState } from 'react';
+import { LuArrowDownUp, LuCalendarDays, LuChevronDown, LuEllipsis, LuFolderPlus, LuX } from 'react-icons/lu';
 import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 import Swal from 'sweetalert2';
+import { FaRegFlag } from 'react-icons/fa';
+import { RiProjector2Line } from 'react-icons/ri';
+import { useForm } from 'react-hook-form';
 
 const TasksShow = () => {
     const axiosSecure = UseAxiosSecures();
+    // for show defult data in update task 
+    const [selectedTask, setSelectedTask] = useState(null);
+    const { register, handleSubmit,reset, formState: { errors } } = useForm()
     // for search project 
     const [search, setSearch] = useState('');
     
@@ -20,11 +26,57 @@ const TasksShow = () => {
     const {data:tasks=[] } = useQuery({
         queryKey:['tasks',search,status,priority,sort],
         queryFn: async () => {
-            const res = await axiosSecure.get(`/tasks?searchText=${search}&status=${status}&priority=${priority}&sort={sort}`)
+            const res = await axiosSecure.get(`/tasks?searchText=${search}&status=${status}&priority=${priority}&sort=${sort}`)
             // console.log(res)
             return res.data
         }
     })
+
+    // update task 
+    const openaddTaskModalRef = useRef();
+
+    const handleUpdateTask = (task) => {
+        setSelectedTask(task);
+        reset({
+            title: task.title,
+            description: task.description,
+            priority: task.priority,
+            dueDate: task.dueDate,
+            status: task.status
+        });
+        // console.log(task)
+        openaddTaskModalRef.current.showModal();
+    }
+
+    // update api use useMutation 
+    const updateTaskMutation = useMutation({
+        mutationFn: async ({id, taskData}) => {
+            const res = await axiosSecure.patch(`/tasks/${id}`,taskData)
+            return res.data
+        }, 
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] })
+            if (data.modifiedCount) {
+                Swal.fire({
+                    title: "Updated!",
+                    text: "Task has been updated successfully.",
+                    icon: "success"
+                });
+            }
+        }
+    })
+        // update modal data 
+    const onSubmit = (data) => {
+        if (selectedTask) {
+            updateTaskMutation.mutate({
+                id: selectedTask._id,
+                taskData: data
+            })
+  
+        }
+        
+        openaddTaskModalRef.current.close()
+    }
 
     // delete task mutation 
      const queryClient = useQueryClient()
@@ -410,7 +462,7 @@ const TasksShow = () => {
                                                     </li>
 
                                                     <li>
-                                                        <button type="button">
+                                                        <button onClick={()=>handleUpdateTask(task)} type="button">
                                                             Edit
                                                         </button>
                                                     </li>
@@ -424,10 +476,11 @@ const TasksShow = () => {
                                                         </button>
                                                     </li>
                                                 </ul>
+                                                                                  
                                             </div>
-                                            
-                                                                   
+                                                                
                                         </th>
+                                        
                                     </tr>
                                 ))
                             }
@@ -435,6 +488,257 @@ const TasksShow = () => {
                         </tbody>
 
                     </table>
+
+                    
+                    <dialog ref={openaddTaskModalRef} className="modal modal-bottom sm:modal-middle">
+                        <div className="modal-box max-w-2xl">
+                            <div className="flex items-start justify-between px-7 pt-7">
+                                <div className="flex items-center gap-4">
+
+                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
+                                        <LuFolderPlus size={28} />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-base-content">
+                                            Edit Task
+                                        </h2>
+
+                                        <p className="mt-1 text-sm text-muted">
+                                            Edit the task details below.
+                                        </p>
+                                    </div>
+
+                                </div>
+                                <div className="">
+                                    <form method="dialog">
+                                        {/* if there is a button in form, it will close the modal */}
+                                        <button
+                                            className="btn rounded-lg p-2 text-slate-400 transition hover:bg-base-200 hover:text-base-content"
+                                        >
+                                            <LuX size={18} />
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <div className="space-y-6 px-7 py-6">
+
+                                    {/* Project Name */}
+                                    <div>
+                                        <label className="mb-2 block text-sm font-semibold text-base-content">
+                                            Task Name <span className="text-error">*</span>
+                                        </label>
+
+                                        <div className="relative">
+
+                                            <RiProjector2Line
+                                                size={20}
+                                                className="absolute left-4 top-1/2 -translate-y-1/2 z-5 text-slate-400"
+                                            />
+
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. Build authentication system"
+                                                className={`input h-10 w-full rounded-xl border bg-base-100 pl-12 pr-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 ${errors.title
+                                                    ? "border-error"
+                                                    : "border-base-300"
+                                                    }`}
+                                                {...register("title", {
+                                                    required: "Task name is required",
+                                                    minLength: {
+                                                        value: 3,
+                                                        message:
+                                                            "Project name must be at least 3 characters",
+                                                    },
+                                                })}
+                                            />
+
+                                        </div>
+
+                                        {errors.name && (
+                                            <p className="mt-1.5 text-sm text-error">
+                                                {errors.name.message}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Description */}
+                                    <div>
+                                        <label className="mb-2 block text-sm font-semibold text-base-content">
+                                            Description <span className="text-error">*</span>
+                                        </label>
+
+                                        <div className="relative">
+
+                                            <LuFolderPlus
+                                                size={20}
+                                                className="absolute left-4 top-5 text-slate-400"
+                                            />
+
+                                            <textarea
+                                                rows={4}
+                                                maxLength={500}
+                                                placeholder="Describe your project, goals and objectives..."
+                                                className={`textarea min-h-32 w-full resize-none rounded-xl border bg-base-100 pl-12 pr-4 pt-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 ${errors.description
+                                                    ? "border-error"
+                                                    : "border-base-300"
+                                                    }`}
+                                                {...register("description", {
+                                                    required: "Project description is required",
+                                                    maxLength: {
+                                                        value: 500,
+                                                        message:
+                                                            "Description cannot exceed 500 characters",
+                                                    },
+                                                })}
+                                            />
+
+                                        </div>
+
+                                        {errors.description && (
+                                            <p className="mt-1.5 text-sm text-error">
+                                                {errors.description.message}
+                                            </p>
+                                        )}
+
+                                        <p className="mt-1 text-right text-xs text-muted">
+                                            Maximum 500 characters
+                                        </p>
+                                    </div>
+
+                                    {/* Status + Due Date */}
+                                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                                        {/* Priority */}
+                                        <div>
+                                            <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                Priority <span className="text-error">*</span>
+                                            </label>
+
+                                            <div className="relative text-warning">
+                                                <FaRegFlag
+                                                    size={20}
+                                                    className="absolute left-4 top-1/2 -translate-y-1/2 z-5 text-slate-400 text-warning"
+                                                />
+
+                                                <select
+                                                    className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                    {...register("priority")}
+                                                >
+                                                    <option value="High">
+                                                        High
+                                                    </option>
+
+                                                    <option value="Medium">
+                                                        Medium
+                                                    </option>
+
+                                                    <option value="Low">
+                                                        Low
+                                                    </option>
+                                                    {/* 
+                                                                                                                <option value="completed">
+                                                                                                                    Completed
+                                                                                                                </option> */}
+                                                </select>
+
+                                                <LuChevronDown
+                                                    size={20}
+                                                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                                />
+
+                                            </div>
+                                        </div>
+
+                                        {/* Due Date */}
+                                        <div>
+                                            <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                Due Date
+                                            </label>
+
+                                            <div className="relative">
+
+                                                <LuCalendarDays
+                                                    size={20}
+                                                    className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400"
+                                                />
+
+                                                <input
+                                                    type="date"
+                                                    className="input h-10 w-full rounded-xl border border-base-300 bg-base-100 pl-12 pr-4 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                    {...register("dueDate")}
+                                                />
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div>
+                                        <label className="mb-2 block text-sm font-semibold text-base-content">
+                                            Status
+                                        </label>
+
+                                        <div className="relative">
+
+                                            <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
+
+                                            <select
+                                                className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                {...register("status")}
+                                            >
+                                                <option value="To Do">
+                                                    To Do
+                                                </option>
+
+                                                <option value="In Progress">
+                                                    In Progress
+                                                </option>
+
+                                                <option value="Done">
+                                                    Done
+                                                </option>
+
+                                                <option value="Completed">
+                                                    Completed
+                                                </option>
+                                            </select>
+
+                                            <LuChevronDown
+                                                size={20}
+                                                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                            />
+
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                {/* Footer */}
+                                <div className="flex justify-end gap-3 border-t border-base-300 px-7 py-5">
+                                    <form method="dialog">
+                                        <button
+                                            className="h-12 rounded-xl border border-base-300 bg-base-100 px-7 font-semibold text-slate-600 transition hover:bg-base-200"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </form>
+
+
+                                    <button
+                                        type="submit"
+                                        className="h-12 rounded-xl bg-primary px-7 font-semibold text-white shadow-sm transition hover:bg-[#4525D9] hover:shadow-md"
+                                    >
+                                        Update Task
+                                    </button>
+
+                                </div>
+
+                            </form>
+                        </div>
+                    </dialog>
                 </div>
 
             </div>
