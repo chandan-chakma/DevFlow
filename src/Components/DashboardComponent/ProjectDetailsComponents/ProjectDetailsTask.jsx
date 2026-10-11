@@ -5,11 +5,21 @@ import { FaRegFlag } from 'react-icons/fa';
 import { LuCalendarDays, LuCheck, LuChevronDown, LuCircle, LuCircleDot, LuDownload, LuFileImage, LuFlag, LuFolderPlus, LuLightbulb, LuMessageCircle, LuPaperclip, LuPlus, LuSearch, LuSend, LuTag, LuUsers, LuX } from 'react-icons/lu';
 import { RiProjector2Line } from 'react-icons/ri';
 import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
+import { data } from 'react-router';
 
 const ProjectDetailsTask = ({ project }) => {
     // console.log(project)
+    // search Task 
+    const [search, setSearch] = useState('')
+    // filter by priority 
+    const [priority, setPriority] = useState('');
+    // sort dueDate wise Task 
+    const [sort, setSort] = useState('due-latest');
+    // selected task show write panel 
+    const [selectedTask, setSelectedTask] = useState([]);
+    
     const { _id:id } = project
     // console.log(_id)
     const axiosSecure = UseAxiosSecures();
@@ -19,7 +29,7 @@ const ProjectDetailsTask = ({ project }) => {
     }
 
     const { register, handleSubmit, formState:{ errors } } = useForm()
-    
+    // Post or create task 
     // using tanstak library usemutation for refetch ui
     const queryClient = useQueryClient();
     const postTaskMutation = useMutation({
@@ -60,41 +70,32 @@ const ProjectDetailsTask = ({ project }) => {
     // Selected task
     // ---------------------------------------------------------
 
-    const [selectedTask, setSelectedTask] = useState({
-        id: 4,
-        title: "Build authentication system",
-        description:
-            "Implement login, register and JWT-based authentication for the application.",
-        dueDate: "Apr 18, 2025",
-        priority: "High",
-        status: "in-progress",
-        assignee: {
-            name: "Sarah Khan",
-            role: "Frontend Developer",
-            image: "https://i.pravatar.cc/100?img=11",
-        },
-        labels: ["Authentication", "Frontend"],
-        attachments: [
-            {
-                name: "auth-flow.png",
-                size: "2.4 MB",
-            },
-        ],
-        comments: [
-            {
-                name: "Sarah Khan",
-                time: "2 hours ago",
-                image: "https://i.pravatar.cc/100?img=11",
-                text: "I've started working on the login page. Will push the code today.",
-            },
-            {
-                name: "Imran Hossain",
-                time: "1 hour ago",
-                image: "https://i.pravatar.cc/100?img=15",
-                text: "Looks good! Let me know if you need any help.",
-            },
-        ],
-    });
+    // get specific project tasks data
+    const {data:projectTasks=[] } = useQuery({
+        queryKey: ['project-tasks',id,search,priority,sort],
+        queryFn: async () => {
+            const res = await axiosSecure.get(`projects/${id}/tasks?searchText=${search}&priority=${priority}&sort=${sort}`)
+            // console.log(res);
+            return res.data;
+        }
+    })
+    const tasks = {
+        todo: projectTasks.filter(task => task.status === 'To Do'),
+        inProgress: projectTasks.filter(task => task.status === 'In Progress'),
+        done: projectTasks.filter(task => task.status === 'Done')
+    };
+
+    // filter task data
+    // firt search task data 
+    const handleSearchTaskData = (e) => {
+        setSearch(e.target.value);
+        
+    }
+
+
+
+   
+        
 
 
     // ---------------------------------------------------------
@@ -102,155 +103,7 @@ const ProjectDetailsTask = ({ project }) => {
     // Later this will come from MongoDB
     // ---------------------------------------------------------
 
-    const tasks = {
-        todo: [
-            {
-                id: 1,
-                title: "Design landing page",
-                description:
-                    "Create a modern and responsive landing page for the application.",
-                dueDate: "Apr 20, 2025",
-                priority: "High",
-                status: "todo",
-                members: [
-                    "https://i.pravatar.cc/100?img=12",
-                    "https://i.pravatar.cc/100?img=13",
-                    "https://i.pravatar.cc/100?img=14",
-                ],
-            },
-            {
-                id: 2,
-                title: "Set up database schema",
-                description:
-                    "Design and implement MongoDB schema for the application.",
-                dueDate: "Apr 22, 2025",
-                priority: "Medium",
-                status: "todo",
-                members: [
-                    "https://i.pravatar.cc/100?img=14",
-                    "https://i.pravatar.cc/100?img=15",
-                ],
-            },
-            {
-                id: 3,
-                title: "Write API documentation",
-                description:
-                    "Document all API endpoints with examples and usage details.",
-                dueDate: "Apr 25, 2025",
-                priority: "Low",
-                status: "todo",
-                members: [
-                    "https://i.pravatar.cc/100?img=16",
-                ],
-            },
-        ],
 
-        inProgress: [
-            {
-                id: 4,
-                title: "Build authentication system",
-                description:
-                    "Implement login, register and JWT-based authentication for the application.",
-                dueDate: "Apr 18, 2025",
-                priority: "High",
-                status: "in-progress",
-                members: [
-                    "https://i.pravatar.cc/100?img=11",
-                    "https://i.pravatar.cc/100?img=12",
-                ],
-            },
-            {
-                id: 5,
-                title: "Create project CRUD API",
-                description:
-                    "Build endpoints for creating, reading, updating and deleting projects.",
-                dueDate: "Apr 21, 2025",
-                priority: "Medium",
-                status: "in-progress",
-                members: [
-                    "https://i.pravatar.cc/100?img=14",
-                    "https://i.pravatar.cc/100?img=15",
-                ],
-            },
-            {
-                id: 6,
-                title: "Develop task management UI",
-                description:
-                    "Build task list, add/edit/delete functionality.",
-                dueDate: "Apr 24, 2025",
-                priority: "High",
-                status: "in-progress",
-                members: [
-                    "https://i.pravatar.cc/100?img=16",
-                ],
-            },
-            {
-                id: 7,
-                title: "Implement real-time updates",
-                description:
-                    "Use Socket.IO for live project and task updates.",
-                dueDate: "Apr 28, 2025",
-                priority: "Medium",
-                status: "in-progress",
-                members: [
-                    "https://i.pravatar.cc/100?img=17",
-                    "https://i.pravatar.cc/100?img=18",
-                ],
-            },
-        ],
-
-        done: [
-            {
-                id: 8,
-                title: "Setup project structure",
-                description:
-                    "Initialize Next.js project with Tailwind CSS and DaisyUI.",
-                dueDate: "Apr 10, 2025",
-                priority: "Low",
-                status: "done",
-                members: [
-                    "https://i.pravatar.cc/100?img=19",
-                    "https://i.pravatar.cc/100?img=20",
-                ],
-            },
-            {
-                id: 9,
-                title: "Configure environment",
-                description:
-                    "Set up environment variables and API configuration.",
-                dueDate: "Apr 12, 2025",
-                priority: "Medium",
-                status: "done",
-                members: [
-                    "https://i.pravatar.cc/100?img=21",
-                ],
-            },
-            {
-                id: 10,
-                title: "Create login page UI",
-                description:
-                    "Design and implement the login page with form validation.",
-                dueDate: "Apr 14, 2025",
-                priority: "Low",
-                status: "done",
-                members: [
-                    "https://i.pravatar.cc/100?img=22",
-                ],
-            },
-            {
-                id: 11,
-                title: "Deploy frontend to Vercel",
-                description:
-                    "Deploy the application to Vercel for production.",
-                dueDate: "Apr 16, 2025",
-                priority: "Low",
-                status: "done",
-                members: [
-                    "https://i.pravatar.cc/100?img=23",
-                ],
-            },
-        ],
-    };
 
 
     // ---------------------------------------------------------
@@ -276,44 +129,7 @@ const ProjectDetailsTask = ({ project }) => {
     // ---------------------------------------------------------
 
     const handleSelectTask = (task) => {
-
-        setSelectedTask({
-            ...task,
-
-            assignee: {
-                name: "Sarah Khan",
-                role: "Frontend Developer",
-                image:
-                    task.members?.[0] ||
-                    "https://i.pravatar.cc/100?img=11",
-            },
-
-            labels: ["Authentication", "Frontend"],
-
-            attachments: [
-                {
-                    name: "auth-flow.png",
-                    size: "2.4 MB",
-                },
-            ],
-
-            comments: [
-                {
-                    name: "Sarah Khan",
-                    time: "2 hours ago",
-                    image: "https://i.pravatar.cc/100?img=11",
-                    text:
-                        "I've started working on the login page. Will push the code today.",
-                },
-                {
-                    name: "Imran Hossain",
-                    time: "1 hour ago",
-                    image: "https://i.pravatar.cc/100?img=15",
-                    text:
-                        "Looks good! Let me know if you need any help.",
-                },
-            ],
-        });
+        setSelectedTask(task)
     };
 
 
@@ -350,57 +166,13 @@ const ProjectDetailsTask = ({ project }) => {
                                 className="shrink-0 text-muted"
                             />
 
-                            <input
+                            <input onChange={handleSearchTaskData}
                                 type="text"
                                 placeholder="Search tasks..."
                                 className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
                             />
 
                         </div>
-
-
-                        {/* Status */}
-
-                        <div className="dropdown">
-
-                            <button
-                                tabIndex={0}
-                                type="button"
-                                className="flex h-11 min-w-35 items-center justify-between gap-5 rounded-lg border border-base-300 bg-base-100 px-4 text-sm font-medium"
-                            >
-
-                                <span>All Status</span>
-
-                                <LuChevronDown
-                                    size={17}
-                                    className="text-muted"
-                                />
-
-                            </button>
-
-                            <ul
-                                tabIndex={-1}
-                                className="menu dropdown-content z-50 mt-2 w-40 rounded-lg border border-base-300 bg-base-100 p-2 shadow-lg"
-                            >
-                                <li>
-                                    <button>All Status</button>
-                                </li>
-
-                                <li>
-                                    <button>To Do</button>
-                                </li>
-
-                                <li>
-                                    <button>In Progress</button>
-                                </li>
-
-                                <li>
-                                    <button>Done</button>
-                                </li>
-                            </ul>
-
-                        </div>
-
 
                         {/* Priority */}
 
@@ -412,7 +184,7 @@ const ProjectDetailsTask = ({ project }) => {
                                 className="flex h-11 min-w-35 items-center justify-between gap-5 rounded-lg border border-base-300 bg-base-100 px-4 text-sm font-medium"
                             >
 
-                                <span>All Priority</span>
+                                <span>{priority===''?'All Priority':priority}</span>
 
                                 <LuChevronDown
                                     size={17}
@@ -426,19 +198,19 @@ const ProjectDetailsTask = ({ project }) => {
                                 className="menu dropdown-content z-50 mt-2 w-40 rounded-lg border border-base-300 bg-base-100 p-2 shadow-lg"
                             >
                                 <li>
-                                    <button>All Priority</button>
+                                    <button onClick={()=>setPriority('')}>All Priority</button>
                                 </li>
 
                                 <li>
-                                    <button>High</button>
+                                    <button onClick={()=>setPriority('High')}>High</button>
                                 </li>
 
                                 <li>
-                                    <button>Medium</button>
+                                    <button onClick={()=>setPriority('Medium')}>Medium</button>
                                 </li>
 
                                 <li>
-                                    <button>Low</button>
+                                    <button onClick={()=>setPriority('Low')}>Low</button>
                                 </li>
                             </ul>
 
@@ -455,7 +227,7 @@ const ProjectDetailsTask = ({ project }) => {
                                 className="flex h-11 min-w-40 items-center justify-between gap-5 rounded-lg border border-base-300 bg-base-100 px-4 text-sm font-medium"
                             >
 
-                                <span>Due Date (Newest)</span>
+                                <span>Due Date  {sort === 'due-latest' ? '(Soonest)' : '(Latest)'}</span>
 
                                 <LuChevronDown
                                     size={17}
@@ -469,11 +241,11 @@ const ProjectDetailsTask = ({ project }) => {
                                 className="menu dropdown-content z-50 mt-2 w-48 rounded-lg border border-base-300 bg-base-100 p-2 shadow-lg"
                             >
                                 <li>
-                                    <button>Due Date (Newest)</button>
+                                    <button onClick={() => setSort('due-latest')}>Due Date — Soonest</button>
                                 </li>
 
                                 <li>
-                                    <button>Due Date (Oldest)</button>
+                                    <button onClick={() => setSort('due-earliest')}> Due Date — Latest</button>
                                 </li>
                             </ul>
 
@@ -528,11 +300,11 @@ const ProjectDetailsTask = ({ project }) => {
                                 {tasks.todo.map((task) => (
 
                                     <div
-                                        key={task.id}
+                                        key={task._id}
                                         onClick={() =>
                                             handleSelectTask(task)
                                         }
-                                        className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?.id === task.id
+                                        className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?._id === task._id
                                                 ? "border-primary"
                                                 : "border-base-300"
                                             }`}
@@ -582,7 +354,7 @@ const ProjectDetailsTask = ({ project }) => {
 
                                             <div className="flex -space-x-2">
 
-                                                {task.members.map(
+                                                {/* {task.members.map(
                                                     (
                                                         member,
                                                         index
@@ -603,7 +375,7 @@ const ProjectDetailsTask = ({ project }) => {
                                                         <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-blue-50 text-[10px] font-bold text-blue-500">
                                                             +1
                                                         </span>
-                                                    )}
+                                                    )} */}
 
                                             </div>
 
@@ -664,11 +436,11 @@ const ProjectDetailsTask = ({ project }) => {
                                 {tasks.inProgress.map((task) => (
 
                                     <div
-                                        key={task.id}
+                                        key={task._id}
                                         onClick={() =>
                                             handleSelectTask(task)
                                         }
-                                        className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?.id === task.id
+                                        className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?._id === task._id
                                                 ? "border-primary"
                                                 : "border-base-300"
                                             }`}
@@ -708,7 +480,7 @@ const ProjectDetailsTask = ({ project }) => {
 
                                             <div className="flex -space-x-2">
 
-                                                {task.members.map(
+                                                {/* {task.members.map(
                                                     (
                                                         member,
                                                         index
@@ -722,7 +494,7 @@ const ProjectDetailsTask = ({ project }) => {
                                                         />
 
                                                     )
-                                                )}
+                                                )} */}
 
                                             </div>
 
@@ -786,11 +558,11 @@ const ProjectDetailsTask = ({ project }) => {
                                 {tasks.done.map((task) => (
 
                                     <div
-                                        key={task.id}
+                                        key={task._id}
                                         onClick={() =>
                                             handleSelectTask(task)
                                         }
-                                        className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?.id === task.id
+                                        className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?._id === task._id
                                                 ? "border-primary"
                                                 : "border-base-300"
                                             }`}
@@ -839,7 +611,7 @@ const ProjectDetailsTask = ({ project }) => {
 
                                             <div className="flex -space-x-2">
 
-                                                {task.members.map(
+                                                {/* {task.members.map(
                                                     (
                                                         member,
                                                         index
@@ -853,7 +625,7 @@ const ProjectDetailsTask = ({ project }) => {
                                                         />
 
                                                     )
-                                                )}
+                                                )} */}
 
                                             </div>
 
@@ -905,7 +677,7 @@ const ProjectDetailsTask = ({ project }) => {
 
                                     <span className="h-2 w-2 rounded-full bg-primary"></span>
 
-                                    In Progress
+                                    {selectedTask.status}
 
                                 </span>
 
