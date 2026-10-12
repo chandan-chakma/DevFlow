@@ -33,7 +33,7 @@ const TasksShow = () => {
     })
 
     // update task 
-    const openaddTaskModalRef = useRef();
+    const openaEditTaskModalRef = useRef();
 
     const handleUpdateTask = (task) => {
         setSelectedTask(task);
@@ -45,7 +45,7 @@ const TasksShow = () => {
             status: task.status
         });
         // console.log(task)
-        openaddTaskModalRef.current.showModal();
+        openaEditTaskModalRef.current.showModal();
     }
 
     // update api use useMutation 
@@ -75,7 +75,7 @@ const TasksShow = () => {
   
         }
         
-        openaddTaskModalRef.current.close()
+        openaEditTaskModalRef.current.close()
     }
 
     // delete task mutation 
@@ -490,7 +490,7 @@ const TasksShow = () => {
                     </table>
 
                     
-                    <dialog ref={openaddTaskModalRef} className="modal modal-bottom sm:modal-middle">
+                    <dialog ref={openaEditTaskModalRef} className="modal modal-bottom sm:modal-middle">
                         <div className="modal-box max-w-2xl">
                             <div className="flex items-start justify-between px-7 pt-7">
                                 <div className="flex items-center gap-4">
