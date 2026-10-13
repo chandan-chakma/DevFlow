@@ -227,6 +227,68 @@ const ProjectDetailsTask = ({ project }) => {
 
         handleStatusUpdate(taskId, newStatus);
     };
+
+    // comment post 
+    // comment state 
+    const [commentText, setCommentText] = useState('');
+    const postCommentMutation = useMutation({
+        mutationFn: async (commentData) => {
+            const res = await axiosSecure.post(
+                `/tasks/${selectedTask._id}/comments`,
+                commentData
+            );
+
+            return res.data;
+        },
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['taskComments', selectedTask?._id]})
+            setCommentText('');
+            Swal.fire({
+                title: 'Comment posted!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        },
+
+        onError: (error) => {
+            console.error(error);
+
+            Swal.fire({
+                title: 'Failed to post comment',
+                text: error.response?.data?.message || 'Please try again.',
+                icon: 'error'
+            });
+        }
+    });
+
+    const handlePostComment = (e) => {
+        e.preventDefault();
+
+        const content = commentText.trim();
+
+        if (!content || !selectedTask?._id) return;
+
+        postCommentMutation.mutate({ content });
+    };
+
+    // get comment data 
+    const {
+        data: comments = [],
+        isLoading: commentsLoading,
+        isError: commentsError
+    } = useQuery({
+        queryKey: ['taskComments', selectedTask?._id],
+        enabled: !!selectedTask?._id,
+        queryFn: async () => {
+            const res = await axiosSecure.get(
+                `/tasks/${selectedTask._id}/comments`
+            );
+            return res.data;
+        }
+
+    });
     return (
         <div className="w-full">
 
@@ -1645,50 +1707,61 @@ const ProjectDetailsTask = ({ project }) => {
                                         />
 
                                         <span>
-                                            Comments (3)
+                                            Comments ({comments.length})
                                         </span>
 
                                     </div>
 
+                                    {commentsLoading ? (
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                    ) : commentsError ? (
+                                        <p className="text-xs text-error">
+                                            Failed to load comments.
+                                        </p>
+                                    ) : comments.length === 0 ? (
+                                        <p className="py-3 text-xs text-muted">
+                                            No comments yet. Start the conversation!
+                                        </p>
+                                            ) : (
+                                                    comments.map((comment) => (
+                                                        <div key={comment._id} className="mb-4 flex gap-3">
 
-                                    {/* Comment 1 */}
+                                                            <img
+                                                                src="https://i.pravatar.cc/100?img=11"
+                                                                alt=""
+                                                                className="h-8 w-8 shrink-0 rounded-full object-cover"
+                                                            />
 
-                                    <div className="mb-4 flex gap-3">
+                                                            <div className="min-w-0">
 
-                                        <img
-                                            src="https://i.pravatar.cc/100?img=11"
-                                            alt=""
-                                            className="h-8 w-8 shrink-0 rounded-full object-cover"
-                                        />
+                                                                <div className="flex flex-wrap items-center gap-2">
 
-                                        <div className="min-w-0">
+                                                                    <p className="text-xs font-semibold">
+                                                                        Sarah Khan
+                                                                    </p>
 
-                                            <div className="flex flex-wrap items-center gap-2">
+                                                                    <span className="text-[10px] text-muted">
+                                                                        {new Date(comment.createdAt).toLocaleString()}
+                                                                    </span>
 
-                                                <p className="text-xs font-semibold">
-                                                    Sarah Khan
-                                                </p>
+                                                                </div>
 
-                                                <span className="text-[10px] text-muted">
-                                                    2 hours ago
-                                                </span>
+                                                                <p className="mt-1 text-xs leading-5 text-muted">
+                                                                    {comment.content}
+                                                                </p>
 
-                                            </div>
+                                                            </div>
 
-                                            <p className="mt-1 text-xs leading-5 text-muted">
-                                                I've started working on the
-                                                login page. Will push the
-                                                code today.
-                                            </p>
-
-                                        </div>
-
-                                    </div>
+                                                        </div>
+                                                    )
+                                                    )         
+                                    )
+                                }
 
 
                                     {/* Comment 2 */}
 
-                                    <div className="mb-4 flex gap-3">
+                                    {/* <div className="mb-4 flex gap-3">
 
                                         <img
                                             src="https://i.pravatar.cc/100?img=15"
@@ -1717,28 +1790,31 @@ const ProjectDetailsTask = ({ project }) => {
 
                                         </div>
 
-                                    </div>
+                                    </div> */}
 
 
                                     {/* Comment Input */}
 
-                                    <div className="flex items-center gap-2">
-
+                                    <form
+                                        onSubmit={handlePostComment}
+                                        className="flex items-center gap-2"
+                                    >
                                         <input
                                             type="text"
+                                            value={commentText}
+                                            onChange={(e) => setCommentText(e.target.value)}
                                             placeholder="Add a comment..."
                                             className="h-10 min-w-0 flex-1 rounded-lg border border-base-300 bg-base-100 px-3 text-xs outline-none placeholder:text-muted focus:border-primary"
                                         />
 
-                                        <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content transition hover:bg-accent-content">
-
-                                            <LuSend
-                                                size={17}
-                                            />
-
+                                        <button
+                                            type="submit"
+                                            disabled={!commentText.trim() || postCommentMutation.isPending}
+                                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content transition hover:bg-accent-content disabled:opacity-50"
+                                        >
+                                            <LuSend size={17} />
                                         </button>
-
-                                    </div>
+                                    </form>
 
                                 </div>
 
