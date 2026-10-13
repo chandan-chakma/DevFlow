@@ -9,7 +9,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 import { data } from 'react-router';
 import { MdDelete } from 'react-icons/md';
-
+import { DndContext } from "@dnd-kit/core";
+import TaskCard from './TaskCard.jsx';
+import DroppableColumn from './dropeableColumn.jsx';
 const ProjectDetailsTask = ({ project }) => {
     // console.log(project)
     // search Task 
@@ -199,7 +201,8 @@ const ProjectDetailsTask = ({ project }) => {
             }
         });           
     }
-//    status update 
+    //    status update 
+    // drag and drop wise 
     const handleStatusUpdate = (taskId, newStatus) => {
         updateTaskMutation.mutate({
             id: taskId,
@@ -208,7 +211,22 @@ const ProjectDetailsTask = ({ project }) => {
             }
         })
     }
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
 
+        if (!over) return;
+
+        const taskId = active.id;
+        const newStatus = over.id;
+
+        const task = projectTasks.find(
+            (task) => task._id === taskId
+        );
+
+        if (!task || task.status === newStatus) return;
+
+        handleStatusUpdate(taskId, newStatus);
+    };
     return (
         <div className="w-full">
 
@@ -333,104 +351,104 @@ const ProjectDetailsTask = ({ project }) => {
                     {/* =================================================
                         KANBAN
                     ================================================== */}
+                    <DndContext onDragEnd={handleDragEnd}>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 
-
-                        {/* =================================================
+                            {/* =================================================
                             TO DO COLUMN
                         ================================================== */}
 
-                        <div className="min-w-0 rounded-xl border border-blue-100 bg-blue-50/40 p-3">
+                            <div className="min-w-0 rounded-xl border border-blue-100 bg-blue-50/40 p-3">
 
 
-                            {/* Column Header */}
+                                {/* Column Header */}
 
-                            <div className="mb-3 flex items-center justify-between px-1">
+                                <div className="mb-3 flex items-center justify-between px-1">
 
-                                <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2">
 
-                                    <LuCircle
-                                        size={21}
-                                        className="fill-transparent text-blue-500"
-                                    />
+                                        <LuCircle
+                                            size={21}
+                                            className="fill-transparent text-blue-500"
+                                        />
 
-                                    <h3 className="text-sm font-bold text-slate-700">
-                                        To Do
-                                    </h3>
+                                        <h3 className="text-sm font-bold text-slate-700">
+                                            To Do
+                                        </h3>
+
+                                    </div>
+
+
+                                    <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-600">
+                                        {tasks.todo.length}
+                                    </span>
 
                                 </div>
 
 
-                                <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-600">
-                                    {tasks.todo.length}
-                                </span>
+                                {/* Tasks */}
+                                <DroppableColumn id='To Do'>
+                                    <div className="space-y-3">
 
-                            </div>
+                                        {tasks.todo.map((task) => (
+                                            <TaskCard key={task._id} task={task}>
+                                                <div
+                                                    // key={task._id}
+                                                    onClick={() =>
+                                                        handleSelectTask(task)
+                                                    }
+                                                    className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?._id === task._id
+                                                        ? "border-primary"
+                                                        : "border-base-300"
+                                                        }`}
+                                                >
 
+                                                    {/* Title */}
 
-                            {/* Tasks */}
-
-                            <div className="space-y-3">
-
-                                {tasks.todo.map((task) => (
-
-                                    <div
-                                        key={task._id}
-                                        onClick={() =>
-                                            handleSelectTask(task)
-                                        }
-                                        className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?._id === task._id
-                                                ? "border-primary"
-                                                : "border-base-300"
-                                            }`}
-                                    >
-
-                                        {/* Title */}
-
-                                        <h4 className="mb-1 text-sm font-bold text-slate-700">
-                                            {task.title}
-                                        </h4>
+                                                    <h4 className="mb-1 text-sm font-bold text-slate-700">
+                                                        {task.title}
+                                                    </h4>
 
 
-                                        {/* Description */}
+                                                    {/* Description */}
 
-                                        <p className="mb-3 line-clamp-2 text-xs leading-5 text-muted">
-                                            {task.description}
-                                        </p>
-
-
-                                        {/* Date */}
-
-                                        <div className="mb-3 flex items-center gap-2 text-xs text-muted">
-
-                                            <LuCalendarDays size={14} />
-
-                                            <span>
-                                                {task.dueDate}
-                                            </span>
-
-                                        </div>
+                                                    <p className="mb-3 line-clamp-2 text-xs leading-5 text-muted">
+                                                        {task.description}
+                                                    </p>
 
 
-                                        {/* Priority */}
+                                                    {/* Date */}
 
-                                        <span
-                                            className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${priorityStyle(
-                                                task.priority
-                                            )}`}
-                                        >
-                                            {task.priority}
-                                        </span>
+                                                    <div className="mb-3 flex items-center gap-2 text-xs text-muted">
+
+                                                        <LuCalendarDays size={14} />
+
+                                                        <span>
+                                                            {task.dueDate}
+                                                        </span>
+
+                                                    </div>
 
 
-                                        {/* Bottom */}
+                                                    {/* Priority */}
 
-                                        <div className="mt-3 flex items-center justify-between">
+                                                    <span
+                                                        className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${priorityStyle(
+                                                            task.priority
+                                                        )}`}
+                                                    >
+                                                        {task.priority}
+                                                    </span>
 
-                                            <div className="flex -space-x-2">
 
-                                                {/* {task.members.map(
+                                                    {/* Bottom */}
+
+                                                    <div className="mt-3 flex items-center justify-between">
+
+                                                        <div className="flex -space-x-2">
+
+                                                            {/* {task.members.map(
                                                     (
                                                         member,
                                                         index
@@ -453,280 +471,308 @@ const ProjectDetailsTask = ({ project }) => {
                                                         </span>
                                                     )} */}
 
-                                            </div>
+                                                        </div>
 
 
-                                            <MdDelete onClick={()=>handleDeleteTask(task._id)}
-                                                size={18}
-                                                className="text-error"
-                                            />
-                                            <button onClick={() => handleStatusUpdate(task._id, "In Progress")}>move </button>
-
-                                        </div>
-
-                                    </div>
-
-                                ))}
-
-                            </div>
-
-                        </div>
-
-
-                        {/* =================================================
-                            IN PROGRESS COLUMN
-                        ================================================== */}
-
-                        <div className="min-w-0 rounded-xl border border-purple-100 bg-purple-50/40 p-3">
-
-
-                            {/* Header */}
-
-                            <div className="mb-3 flex items-center justify-between px-1">
-
-                                <div className="flex items-center gap-2">
-
-                                    <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-primary">
-
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
-
-                                    </div>
-
-                                    <h3 className="text-sm font-bold text-slate-700">
-                                        In Progress
-                                    </h3>
-
-                                </div>
-
-
-                                <span className="rounded-full bg-purple-100 px-2.5 py-1 text-xs font-bold text-primary">
-                                    {tasks.inProgress.length}
-                                </span>
-
-                            </div>
-
-
-                            {/* Tasks */}
-
-                            <div className="space-y-3">
-
-                                {tasks.inProgress.map((task) => (
-
-                                    <div
-                                        key={task._id}
-                                        onClick={() =>
-                                            handleSelectTask(task)
-                                        }
-                                        className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?._id === task._id
-                                                ? "border-primary"
-                                                : "border-base-300"
-                                            }`}
-                                    >
-
-                                        <h4 className="mb-1 text-sm font-bold text-slate-700">
-                                            {task.title}
-                                        </h4>
-
-
-                                        <p className="mb-3 line-clamp-2 text-xs leading-5 text-muted">
-                                            {task.description}
-                                        </p>
-
-
-                                        <div className="mb-3 flex items-center gap-2 text-xs text-muted">
-
-                                            <LuCalendarDays size={14} />
-
-                                            <span>
-                                                {task.dueDate}
-                                            </span>
-
-                                        </div>
-
-
-                                        <span
-                                            className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${priorityStyle(
-                                                task.priority
-                                            )}`}
-                                        >
-                                            {task.priority}
-                                        </span>
-
-
-                                        <div className="mt-3 flex items-center justify-between">
-
-                                            <div className="flex -space-x-2">
-
-                                                {/* {task.members.map(
-                                                    (
-                                                        member,
-                                                        index
-                                                    ) => (
-
-                                                        <img
-                                                            key={index}
-                                                            src={member}
-                                                            alt=""
-                                                            className="h-7 w-7 rounded-full border-2 border-white object-cover"
+                                                        <MdDelete onClick={() => handleDeleteTask(task._id)}
+                                                            size={18}
+                                                            className="text-error"
                                                         />
+                                                        <button onClick={() => handleStatusUpdate(task._id, "In Progress")}>move </button>
 
-                                                    )
-                                                )} */}
+                                                    </div>
 
-                                            </div>
+                                                </div>
+
+                                            </TaskCard>
 
 
-                                            <MdDelete onClick={() => handleDeleteTask(task._id)}
-                                                size={18}
-                                                className="text-error"
-                                            />
-                                            
-                                            
-                                        </div>
+
+                                        ))}
 
                                     </div>
 
-                                ))}
-
-                            </div>
-
-                        </div>
-
-
-                        {/* =================================================
-                            DONE COLUMN
-                        ================================================== */}
-
-                        <div className="min-w-0 rounded-xl border border-green-100 bg-green-50/40 p-3">
-
-
-                            {/* Header */}
-
-                            <div className="mb-3 flex items-center justify-between px-1">
-
-                                <div className="flex items-center gap-2">
-
-                                    <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-success">
-
-                                        <LuCheck
-                                            size={13}
-                                            className="text-success"
-                                        />
-
-                                    </div>
-
-                                    <h3 className="text-sm font-bold text-slate-700">
-                                        Done
-                                    </h3>
-
-                                </div>
-
-
-                                <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-bold text-green-600">
-                                    {tasks.done.length}
-                                </span>
-
-                            </div>
-
-
-                            {/* Tasks */}
-
-                            <div className="space-y-3">
-
-                                {tasks.done.map((task) => (
-
-                                    <div
-                                        key={task._id}
-                                        onClick={() =>
-                                            handleSelectTask(task)
-                                        }
-                                        className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?._id === task._id
-                                                ? "border-primary"
-                                                : "border-base-300"
-                                            }`}
-                                    >
-
-                                        <div className="flex items-start justify-between gap-2">
-
-                                            <h4 className="mb-1 text-sm font-bold text-slate-700">
-                                                {task.title}
-                                            </h4>
-
-                                            <LuCheck
-                                                size={17}
-                                                className="shrink-0 rounded-full bg-green-100 p-0.5 text-green-600"
-                                            />
-
-                                        </div>
-
-
-                                        <p className="mb-3 line-clamp-2 text-xs leading-5 text-muted">
-                                            {task.description}
-                                        </p>
-
-
-                                        <div className="mb-3 flex items-center gap-2 text-xs text-muted">
-
-                                            <LuCalendarDays size={14} />
-
-                                            <span>
-                                                {task.dueDate}
-                                            </span>
-
-                                        </div>
-
-
-                                        <span
-                                            className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${priorityStyle(
-                                                task.priority
-                                            )}`}
-                                        >
-                                            {task.priority}
-                                        </span>
-
-
-                                        <div className="mt-3 flex items-center justify-between">
-
-                                            <div className="flex -space-x-2">
-
-                                                {/* {task.members.map(
-                                                    (
-                                                        member,
-                                                        index
-                                                    ) => (
-
-                                                        <img
-                                                            key={index}
-                                                            src={member}
-                                                            alt=""
-                                                            className="h-7 w-7 rounded-full border-2 border-white object-cover"
-                                                        />
-
-                                                    )
-                                                )} */}
-
-                                            </div>
-
-
-                                            <MdDelete onClick={() => handleDeleteTask(task._id)}
-                                                size={18}
-                                                className="text-error"
-                                            />
-
-                                        </div>
-
-                                    </div>
-
-                                ))}
+                                </DroppableColumn>
                                 
+
                                
 
                             </div>
-                            
+
+
+                            {/* =================================================
+                            IN PROGRESS COLUMN
+                        ================================================== */}
+
+                            <div className="min-w-0 rounded-xl border border-purple-100 bg-purple-50/40 p-3">
+
+
+                                {/* Header */}
+
+                                <div className="mb-3 flex items-center justify-between px-1">
+
+                                    <div className="flex items-center gap-2">
+
+                                        <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-primary">
+
+                                            <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+
+                                        </div>
+
+                                        <h3 className="text-sm font-bold text-slate-700">
+                                            In Progress
+                                        </h3>
+
+                                    </div>
+
+
+                                    <span className="rounded-full bg-purple-100 px-2.5 py-1 text-xs font-bold text-primary">
+                                        {tasks.inProgress.length}
+                                    </span>
+
+                                </div>
+
+
+                                {/* Tasks */}
+                                <DroppableColumn id='In Progress'>
+                                    <div className="space-y-3">
+
+                                        {tasks.inProgress.map((task) => (
+                                            <TaskCard key={task._id} task={task}>
+                                                <div
+                                                    key={task._id}
+                                                    onClick={() =>
+                                                        handleSelectTask(task)
+                                                    }
+                                                    className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?._id === task._id
+                                                        ? "border-primary"
+                                                        : "border-base-300"
+                                                        }`}
+                                                >
+
+                                                    <h4 className="mb-1 text-sm font-bold text-slate-700">
+                                                        {task.title}
+                                                    </h4>
+
+
+                                                    <p className="mb-3 line-clamp-2 text-xs leading-5 text-muted">
+                                                        {task.description}
+                                                    </p>
+
+
+                                                    <div className="mb-3 flex items-center gap-2 text-xs text-muted">
+
+                                                        <LuCalendarDays size={14} />
+
+                                                        <span>
+                                                            {task.dueDate}
+                                                        </span>
+
+                                                    </div>
+
+
+                                                    <span
+                                                        className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${priorityStyle(
+                                                            task.priority
+                                                        )}`}
+                                                    >
+                                                        {task.priority}
+                                                    </span>
+
+
+                                                    <div className="mt-3 flex items-center justify-between">
+
+                                                        <div className="flex -space-x-2">
+
+                                                            {/* {task.members.map(
+                                                    (
+                                                        member,
+                                                        index
+                                                    ) => (
+
+                                                        <img
+                                                            key={index}
+                                                            src={member}
+                                                            alt=""
+                                                            className="h-7 w-7 rounded-full border-2 border-white object-cover"
+                                                        />
+
+                                                    )
+                                                )} */}
+
+                                                        </div>
+
+
+                                                        <MdDelete onClick={() => handleDeleteTask(task._id)}
+                                                            size={18}
+                                                            className="text-error"
+                                                        />
+
+
+                                                    </div>
+
+                                                </div>
+
+                                            </TaskCard>
+
+                                           
+
+                                        ))}
+
+                                    </div>
+
+                                </DroppableColumn>
+
+                                
+
+                            </div>
+
+
+                            {/* =================================================
+                            DONE COLUMN
+                        ================================================== */}
+
+                            <div className="min-w-0 rounded-xl border border-green-100 bg-green-50/40 p-3">
+
+
+                                {/* Header */}
+
+                                <div className="mb-3 flex items-center justify-between px-1">
+
+                                    <div className="flex items-center gap-2">
+
+                                        <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-success">
+
+                                            <LuCheck
+                                                size={13}
+                                                className="text-success"
+                                            />
+
+                                        </div>
+
+                                        <h3 className="text-sm font-bold text-slate-700">
+                                            Done
+                                        </h3>
+
+                                    </div>
+
+
+                                    <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-bold text-green-600">
+                                        {tasks.done.length}
+                                    </span>
+
+                                </div>
+
+
+                                {/* Tasks */}
+                                <DroppableColumn id='Done'>
+                                    <div className="space-y-3">
+
+                                        {tasks.done.map((task) => (
+                                            <TaskCard key={task._id} task={task}>
+                                                <div
+                                                    key={task._id}
+                                                    onClick={() =>
+                                                        handleSelectTask(task)
+                                                    }
+                                                    className={`cursor-pointer rounded-xl border bg-base-100 p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${selectedTask?._id === task._id
+                                                        ? "border-primary"
+                                                        : "border-base-300"
+                                                        }`}
+                                                >
+
+                                                    <div className="flex items-start justify-between gap-2">
+
+                                                        <h4 className="mb-1 text-sm font-bold text-slate-700">
+                                                            {task.title}
+                                                        </h4>
+
+                                                        <LuCheck
+                                                            size={17}
+                                                            className="shrink-0 rounded-full bg-green-100 p-0.5 text-green-600"
+                                                        />
+
+                                                    </div>
+
+
+                                                    <p className="mb-3 line-clamp-2 text-xs leading-5 text-muted">
+                                                        {task.description}
+                                                    </p>
+
+
+                                                    <div className="mb-3 flex items-center gap-2 text-xs text-muted">
+
+                                                        <LuCalendarDays size={14} />
+
+                                                        <span>
+                                                            {task.dueDate}
+                                                        </span>
+
+                                                    </div>
+
+
+                                                    <span
+                                                        className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${priorityStyle(
+                                                            task.priority
+                                                        )}`}
+                                                    >
+                                                        {task.priority}
+                                                    </span>
+
+
+                                                    <div className="mt-3 flex items-center justify-between">
+
+                                                        <div className="flex -space-x-2">
+
+                                                            {/* {task.members.map(
+                                                    (
+                                                        member,
+                                                        index
+                                                    ) => (
+
+                                                        <img
+                                                            key={index}
+                                                            src={member}
+                                                            alt=""
+                                                            className="h-7 w-7 rounded-full border-2 border-white object-cover"
+                                                        />
+
+                                                    )
+                                                )} */}
+
+                                                        </div>
+
+
+                                                        <MdDelete onClick={() => handleDeleteTask(task._id)}
+                                                            size={18}
+                                                            className="text-error"
+                                                        />
+
+                                                    </div>
+
+                                                </div>
+
+                                            </TaskCard>
+
+                                            
+
+                                        ))}
+
+
+
+                                    </div>
+
+                                </DroppableColumn>
+
+                                
+
+
+                            </div>
 
                         </div>
 
-                    </div>
+                    </DndContext>
+                    
 
                 </div>
 
