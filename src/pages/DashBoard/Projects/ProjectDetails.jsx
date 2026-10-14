@@ -8,6 +8,7 @@ import { Activity } from 'lucide-react';
 import Loading from '../../../Components/Loading/Loading.jsx';
 import ProjectDetailsOverview from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsOverview.jsx';
 import ProjectDetailsTask from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsTask.jsx';
+import ProjectDetailsActivity from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsActivity.jsx';
 
 const ProjectDetails = () => {
     const { id } = useParams();
@@ -230,7 +231,7 @@ const ProjectDetails = () => {
 
                         <button onClick={() => setActiveTab('activity')} className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium text-muted ${activeTab === 'activity'
                             ? 'border-primary text-primary'
-                            : 'border-transparent text-muted hover:border-primary hover:text-primary'}hover:text-base-content`}>
+                            : 'border-transparent text-muted hover:border-primary hover:text-primary'}`}>
                             <LuClock3 size={17} />
                             Activity
                         </button>
@@ -261,7 +262,7 @@ const ProjectDetails = () => {
                 }
                 {
                     activeTab === 'activity' && (
-                        <ProjectDetailsTask project={project}></ProjectDetailsTask>
+                        <ProjectDetailsActivity project={ project}></ProjectDetailsActivity>
                     )
                 }
 
