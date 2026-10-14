@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -14,79 +15,48 @@ import {
     LuCalendarDays,
     LuCheck,
 } from 'react-icons/lu';
+import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 
-const activityData = [
-    {
-        id: 1,
-        date: '2025-04-16',
-        time: '10:24 AM',
-        type: 'created',
-        actor: 'Alex Carter',
-        title: 'created a new task',
-        description: 'Design the dashboard UI',
-        status: 'To Do',
-    },
-    {
-        id: 2,
-        date: '2025-04-16',
-        time: '09:12 AM',
-        type: 'status',
-        actor: 'Sarah Khan',
-        title: 'changed task status',
-        description: 'API integration moved from To Do → In Progress',
-        status: 'In Progress',
-    },
-    {
-        id: 3,
-        date: '2025-04-16',
-        time: '08:45 AM',
-        type: 'comment',
-        actor: 'Imran Hossain',
-        title: 'commented on a task',
-        description: 'Looks great! Let me know if you need any help.',
-        task: 'Build authentication API',
-    },
-    {
-        id: 4,
-        date: '2025-04-16',
-        time: '08:20 AM',
-        type: 'updated',
-        actor: 'Fatima Noor',
-        title: 'updated a task',
-        description: 'Updated due date for Design the dashboard UI',
-        status: 'To Do',
-    },
-    {
-        id: 5,
-        date: '2025-04-16',
-        time: '07:56 AM',
-        type: 'deleted',
-        actor: 'Rahim Ahmed',
-        title: 'deleted a task',
-        description: 'Removed old design files task',
-        status: 'Done',
-    },
-    {
-        id: 6,
-        date: '2025-04-15',
-        time: '06:32 PM',
-        type: 'status',
-        actor: 'Sarah Khan',
-        title: 'changed task status',
-        description: 'UI redesign moved from In Progress → Done',
-        status: 'Done',
-    },
-    {
-        id: 7,
-        date: '2025-04-15',
-        time: '02:18 PM',
-        type: 'created',
-        actor: 'Imran Hossain',
-        title: 'created a new task',
-        description: 'Write documentation',
-        status: 'To Do',
-    },
-];
+const normalizeActivity = (item) => {
+    const createdAt = new Date(item.createdAt);
+    const action = (item.action || 'updated').toLowerCase();
+
+    let type = 'updated';
+
+    if (action.includes('creat')) type = 'created';
+    else if (action.includes('status')) type = 'status';
+    else if (action.includes('comment')) type = 'comment';
+    else if (action.includes('delet')) type = 'deleted';
+
+    const entity = item.entityType === 'project' ? 'project' : 'task';
+
+    const titles = {
+        created: `created a new ${entity}`,
+        updated: `updated a ${entity}`,
+        status: 'changed task status',
+        comment: 'commented on a task',
+        deleted: `deleted a ${entity}`,
+    };
+
+    return {
+        id: item._id,
+        date: [
+            createdAt.getFullYear(),
+            String(createdAt.getMonth() + 1).padStart(2, '0'),
+            String(createdAt.getDate()).padStart(2, '0'),
+        ].join('-'),
+        time: createdAt.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+        }),
+        type,
+        actor: item.performedBy?.name || 'A team member',
+        title: titles[type],
+        description: item.description,
+        status: item.status,
+        task: item.taskTitle,
+    };
+};
 
 const activityStyles = {
     created: {
@@ -155,12 +125,25 @@ const formatActivityDate = (dateString) =>
         year: 'numeric',
     });
 
-const ProjectDetailsActivity = () => {
+const ProjectDetailsActivity = ({ project }) => {
+    console.log(project._id)
+    const axiosSecure = UseAxiosSecures();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [filter, setFilter] = useState('all');
     const [showAllUpcoming, setShowAllUpcoming] = useState(false);
 
-    const filteredActivities = activityData.filter(
+    // now get the activities\ 
+    const { data: activities = [],isLoading,isError } = useQuery({
+        queryKey: ['projectActivites', project?._id], 
+        queryFn: async () => {
+            const res = await axiosSecure.get(`/projects/${project._id}/activities`);
+            console.log(res);
+            return res.data.map(normalizeActivity);
+        },
+        enabled: Boolean(project?._id),
+    })
+
+    const filteredActivities = activities.filter(
         (activity) => filter === 'all' || activity.type === filter
     );
 
@@ -170,12 +153,12 @@ const ProjectDetailsActivity = () => {
         return groups;
     }, {});
 
-    const activityCounts = activityData.reduce((counts, activity) => {
+    const activityCounts = activities.reduce((counts, activity) => {
         counts[activity.type] = (counts[activity.type] || 0) + 1;
         return counts;
     }, {});
 
-    const activityDates = new Set(activityData.map((activity) => activity.date));
+    const activityDates = new Set(activities.map((activity) => activity.date));
 
     const visibleUpcoming = showAllUpcoming
         ? upcomingTasks
