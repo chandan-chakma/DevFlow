@@ -4,13 +4,17 @@ import { ArrowRight, MoveRight } from 'lucide-react';
 
 import Logo from '../../../Components/Logo/Logo.jsx'
 import UseAuth from '../../../Hooks/UseAuth.jsx';
+import Loading from '../../../Components/Loading/Loading.jsx';
 
 
 const Navbar = () => {
-    const { user, logOut } = UseAuth()
+    const { user, logOut,loading } = UseAuth()
     const handleLogOut = () => {
         logOut()
     }
+    // if (loading) {
+    //     <Loading></Loading>
+    // }
     const menu = <>
         <a href="#features">Features</a>
         <a href="#pricing">Pricing</a>

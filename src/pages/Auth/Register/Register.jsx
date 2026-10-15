@@ -5,14 +5,18 @@ import { IoEyeOutline, IoLockClosedOutline } from 'react-icons/io5';
 import { FaBook, FaChartLine, FaCheckCircle, FaRegEyeSlash, FaRegUser, FaUserFriends } from 'react-icons/fa';
 import { useForm } from 'react-hook-form';
 import registered from '../../../assets/images/register.png'
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { MdOutlineEmail } from 'react-icons/md';
 import { LuShieldCheck } from 'react-icons/lu';
 import UseAuth from '../../../Hooks/UseAuth.jsx';
+import axios from 'axios';
+import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 const Register = () => {
+    const navigate = useNavigate();
+    const axiosSecure = UseAxiosSecures();
     const [showPassword, setShowPassword] = useState(false); 
     // calling hook useAuth 
-    const { createEmailUser } =UseAuth()
+    const { createEmailUser,updateUserProfile } =UseAuth()
         // react hook form 
         const { register, formState: { errors }, handleSubmit } = useForm();
         const handleRegisterSubmit = (data) => {
@@ -20,6 +24,29 @@ const Register = () => {
             createEmailUser(data.email, data.password)
                 .then(result => {
                     console.log(result);
+                    const userInfo = {
+                        email: data.email,
+                        displayName: data.name,
+                        photoURL: result.user?.photoURL || '',
+                    }
+                    // now post the user 
+                    axiosSecure.post('/users', userInfo)   
+                        .then(res => {
+                            console.log(res)
+                            if (res.data.inserredId) {
+                                console.log('user creates')
+                            }
+                        })
+                    // send the date for updatae firsbase like displayName 
+                    const userProfile = {
+                        displayName: data.name
+                    }
+                    updateUserProfile(userProfile)
+                        .then(() => {
+                            // console.log('user update');
+                            navigate('/dashboard')
+                        });
+                   
                 })
                 .catch(error => {
                 console.log(error)
@@ -116,7 +143,7 @@ const Register = () => {
                                             {errors.password.message}
                                         </p>)}
 
-                                        <button onClick={handleShowPassword} className='btn btn-md absolute right-0.5'>
+                                        <button type='button' onClick={handleShowPassword} className='btn btn-md absolute right-0.5'>
                                             {showPassword ? <FaRegEyeSlash size={18} /> : <IoEyeOutline size={18} />}
                                         </button>
                                         {/* <div>eye</div> */}
@@ -129,7 +156,7 @@ const Register = () => {
                                             Remember me
                                         </label>
                                         <a className="link link-hover">Forgot password?</a></div>
-                                    <button className="btn btn-primary text-primary-content text-lg text-center mt-4">Sign In <MoveRight size={18} /></button>
+                                    <button className="btn btn-primary text-primary-content text-lg text-center mt-4">Register <MoveRight size={18} /></button>
                                 </fieldset>
                             </form>
                             {/* social login  */}

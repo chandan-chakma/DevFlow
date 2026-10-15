@@ -31,7 +31,7 @@ const Login = () => {
         })
     }
     // eye button for password showcassing 
-    const handleShowPassword = (e) => {
+    const handleShowPassword = () => {
         setShowPassword(!showPassword)
     }
     return (
@@ -98,7 +98,7 @@ const Login = () => {
                                             {errors.password.message}
                                         </p>)}
 
-                                        <button onClick={handleShowPassword} className='btn btn-md absolute right-0.5'>
+                                        <button type='button' onClick={handleShowPassword} className='btn btn-md absolute right-0.5'>
                                             {showPassword ? <FaRegEyeSlash size={18} /> : <IoEyeOutline size={18} />}
                                         </button>
                                         {/* <div>eye</div> */}
@@ -111,7 +111,7 @@ const Login = () => {
                                             Remember me
                                         </label>
                                         <a className="link link-hover">Forgot password?</a></div>
-                                    <button className="btn btn-primary text-primary-content text-lg text-center mt-4">Sign In <MoveRight size={18} /></button>
+                                    <button type='submit' className="btn btn-primary text-primary-content text-lg text-center mt-4">Sign In <MoveRight size={18} /></button>
                                 </fieldset>
                             </form>
                             {/* social login  */}

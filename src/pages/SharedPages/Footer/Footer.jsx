@@ -9,7 +9,7 @@ const Footer = () => {
             <footer className="footer sm:footer-horizontal bg-base-100 items-center justify-between py-4 px-8">
                 <aside className="grid-flow-col items-center gap-10">
                     <Logo></Logo>
-                    <nav class="grid grid-flow-col gap-4 text-muted">
+                    <nav className="grid grid-flow-col gap-4 text-muted">
                         <a href="#features">Features</a>
                         <a href="#pricing">Pricing</a>
                         <a href="#about">About</a>

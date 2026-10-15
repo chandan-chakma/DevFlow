@@ -8,8 +8,10 @@ import { FiHome } from 'react-icons/fi';
 import { FaAngleDown, FaRegCalendarCheck } from 'react-icons/fa';
 import { GrAnalytics } from 'react-icons/gr';
 import { AiOutlineSetting } from 'react-icons/ai';
+import UseAuth from '../../Hooks/UseAuth.jsx';
 ;
 const DashBoardLayout = () => {
+    const { user } = UseAuth();
     return (
         <div className='max-w-7xl mx-auto px-6 py-4'>
             <div className="drawer lg:drawer-open">
@@ -71,7 +73,7 @@ const DashBoardLayout = () => {
                                         </div>
 
                                         <div>
-                                            <h1 className='text-neutral text-lg'>Chandan Chakma</h1>
+                                            <h1 className='text-neutral text-lg'>{user.displayName}</h1>
                                             <p className='text-muted text-sm'>Frontend Developer</p>
                                             
                                         </div>

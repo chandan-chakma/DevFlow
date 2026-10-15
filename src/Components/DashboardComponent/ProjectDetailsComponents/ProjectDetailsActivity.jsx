@@ -118,13 +118,42 @@ const upcomingTasks = [
     },
 ];
 
-const formatActivityDate = (dateString) =>
-    new Date(`${ dateString } T12:00:00`).toLocaleDateString('en-US', {
+const formatActivityDate = (dateString) => {
+    if (!dateString) return 'Unknown date';
+
+    // Your grouped activity date should be YYYY-MM-DD
+    const date = new Date(dateString + 'T12:00:00');
+
+    if (Number.isNaN(date.getTime())) {
+        console.error('Invalid activity date:', dateString);
+        return 'Unknown date';
+    }
+
+    return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
     });
+};
+const formatActivityHeading = (dateString) => {
+    const activityDate = new Date(`${dateString}T00:00:00`);
+    const today = new Date();
 
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (activityDate.getTime() === today.getTime()) {
+        return `Today, ${formatActivityDate(dateString)}`;
+    }
+
+    if (activityDate.getTime() === yesterday.getTime()) {
+        return `Yesterday, ${formatActivityDate(dateString)}`;
+    }
+
+    return formatActivityDate(dateString);
+};
 const ProjectDetailsActivity = ({ project }) => {
     console.log(project._id)
     const axiosSecure = UseAxiosSecures();
@@ -247,11 +276,7 @@ const ProjectDetailsActivity = ({ project }) => {
                     {Object.entries(groupedActivities).map(([date, activities]) => (
                         <div key={date}>
                             <h3 className="mb-5 text-sm font-semibold">
-                                {date === '2025-04-16'
-                                    ? `Today, ${ formatActivityDate(date) } `
-                                    : date === '2025-04-15'
-                                        ? `Yesterday, ${ formatActivityDate(date) } `
-                                        : formatActivityDate(date)}
+                              { formatActivityHeading(date)}
                             </h3>
 
                             <div className="space-y-5">
