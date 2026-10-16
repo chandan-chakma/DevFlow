@@ -17,7 +17,7 @@ const Login = () => {
     const navigate = useNavigate()
     const { signInWithEmail } = UseAuth()
     // react hook form 
-    const { register, formState: { errors }, handleSubmit } = useForm();
+    const { register, setError, formState: { errors }, handleSubmit } = useForm();
     const handleLoginSubmit = (data) => {
         // console.log(data);
         signInWithEmail(data.email, data.password)
@@ -28,7 +28,11 @@ const Login = () => {
             })
             .catch(error => {
                 console.log(error);
-        })
+                setError('root.server', {
+                    type: 'manual',
+                    message: 'Email or password is incorrect.',
+                });
+            });
     }
     // eye button for password showcassing 
     const handleShowPassword = () => {
@@ -102,6 +106,10 @@ const Login = () => {
                                             {showPassword ? <FaRegEyeSlash size={18} /> : <IoEyeOutline size={18} />}
                                         </button>
                                         {/* <div>eye</div> */}
+                                        {errors.root?.server && (<p className='text-error'>
+                                            {errors.root.server.message}
+                                        </p>)}
+                                        
 
                                     </div>
 

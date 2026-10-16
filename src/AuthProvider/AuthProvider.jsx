@@ -7,19 +7,25 @@ import Loading from '../Components/Loading/Loading.jsx';
 const AuthProvider = ({ children }) => {
     // state the user 
     const [user, setUser] = useState(null);
+    const [authActionLoading, setAuthActionLoading] = useState(false);
     const [loading, setLoading] = useState(true);
 
     // create user using email and passward 
-    const createEmailUser = (email, password) => {
-        setLoading(true)
-        return createUserWithEmailAndPassword(auth, email, password)
+    const createEmailUser = async(email, password) => {
+        setAuthActionLoading(true);
+        try {
+            return await createUserWithEmailAndPassword(auth, email, password);
+        } finally {
+            setAuthActionLoading(false);
+        }
     };
 
     // sign in user with email and password
 
     const signInWithEmail = (email, password) => {
-        setLoading(true)
+        setAuthActionLoading(true);
         return signInWithEmailAndPassword(auth, email, password)
+  
     };
 
     // update user in firebase for show displayName 
@@ -33,16 +39,20 @@ const AuthProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        onAuthStateChanged(auth, (currentUser) => {
+        const unSubcribe=onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             setLoading(false);
         });
+        return () => {
+            unSubcribe();
+        }
     },[])
 
 
     const authInfo = {
         user,
         loading,
+        authActionLoading,
         createEmailUser,
         signInWithEmail,
         updateUserProfile,
@@ -51,6 +61,7 @@ const AuthProvider = ({ children }) => {
     return (
         <AuthContext value={authInfo}>
             {loading?<Loading></Loading>: children}
+           
         </AuthContext>
     );
 };

@@ -18,45 +18,55 @@ const Register = () => {
     // calling hook useAuth 
     const { createEmailUser,updateUserProfile } =UseAuth()
         // react hook form 
-        const { register, formState: { errors }, handleSubmit } = useForm();
-        const handleRegisterSubmit = (data) => {
-            // console.log(data);
-            createEmailUser(data.email, data.password)
-                .then(result => {
-                    console.log(result);
-                    const userInfo = {
-                        email: data.email,
-                        displayName: data.name,
-                        photoURL: result.user?.photoURL || '',
-                    }
-                    // now post the user 
-                    axiosSecure.post('/users', userInfo)   
-                        .then(res => {
-                            console.log(res)
-                            if (res.data.inserredId) {
-                                console.log('user creates')
-                            }
-                        })
-                    // send the date for updatae firsbase like displayName 
-                    const userProfile = {
-                        displayName: data.name
-                    }
-                    updateUserProfile(userProfile)
-                        .then(() => {
-                            // console.log('user update');
-                            navigate('/dashboard')
-                        });
-                   
-                })
-                .catch(error => {
-                console.log(error)
-            })
+    const { register, setError,
+        clearErrors, formState: { errors }, handleSubmit } = useForm();
+    const handleRegisterSubmit = (data) => {
+        // console.log(data);
+        createEmailUser(data.email, data.password)
+            .then(result => {
+                console.log(result);
+                const userInfo = {
+                    email: data.email,
+                    displayName: data.name,
+                    photoURL: result.user?.photoURL || '',
+                }
+                // now post the user 
+                axiosSecure.post('/users', userInfo)
+                    .then(res => {
+                        console.log(res)
+                        if (res.data.insertedId) {
+                            console.log('user creates')
+                        }
+                    })
+                // send the date for updatae firsbase like displayName 
+                const userProfile = {
+                    displayName: data.name
+                }
+                updateUserProfile(userProfile)
+                    .then(() => {
+                        // console.log('user update');
+                        navigate('/dashboard')
 
-        }
-        // eye button for password showcassing 
-        const handleShowPassword = (e) => {
-            setShowPassword(!showPassword)
-        }
+                    });
+
+
+            })
+            .catch(error => {
+                console.log('Firebase error code:', error.code);
+
+                setError('email', {
+                    type: 'manual',
+                    message: 'This email is already registered. Please log in.',
+                });
+
+                console.log('setError called');
+            });
+    }
+    // eye button for password showcassing 
+    const handleShowPassword = (e) => {
+        setShowPassword(!showPassword)
+    }
+       
     return (
         <div>
             <div className="hero bg-[#EEEEFF] min-h-screen">
@@ -105,7 +115,10 @@ const Register = () => {
                                     <label className="label text-lg">Full Name</label>
                                     <div className='relative'>
                                         <FaRegUser className='absolute z-10 btn btn-xs top-2' />
-                                        <input type="text" {...register('name')} className="input w-full mb-3 pl-10" placeholder="Aziz Dev" />
+                                        <input type="text" {...register('name',{required:'name is requied'})} className="input w-full mb-3 pl-10" placeholder="Aziz Dev" />
+                                        {errors.name && (<p className='text-error'>
+                                            {errors.name.message}
+                                        </p>)}
                                     </div>
                                     
 
@@ -118,6 +131,14 @@ const Register = () => {
                                         {errors.email && (<p className='text-error'>
                                            {errors.email.message}
                                         </p>)}
+                                        {errors.root && (
+                                            <p className="text-error" role="alert">
+                                                {errors.root.message}
+                                            </p>
+                                        )}
+                                       
+                                        
+                                      
 
                                     </div>
 
@@ -157,6 +178,7 @@ const Register = () => {
                                         </label>
                                         <a className="link link-hover">Forgot password?</a></div>
                                     <button className="btn btn-primary text-primary-content text-lg text-center mt-4">Register <MoveRight size={18} /></button>
+                              
                                 </fieldset>
                             </form>
                             {/* social login  */}
