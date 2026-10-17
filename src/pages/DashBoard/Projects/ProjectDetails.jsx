@@ -9,6 +9,7 @@ import Loading from '../../../Components/Loading/Loading.jsx';
 import ProjectDetailsOverview from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsOverview.jsx';
 import ProjectDetailsTask from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsTask.jsx';
 import ProjectDetailsActivity from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsActivity.jsx';
+import ProjectDetailsMember from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsMember.jsx';
 
 const ProjectDetails = () => {
     const { id } = useParams();
@@ -257,7 +258,7 @@ const ProjectDetails = () => {
                 }
                 {
                     activeTab === 'members' && (
-                        <ProjectDetailsTask project={project}></ProjectDetailsTask>
+                        <ProjectDetailsMember project={project}></ProjectDetailsMember>
                     )
                 }
                 {
