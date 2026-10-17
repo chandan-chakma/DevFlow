@@ -1,5 +1,5 @@
 import { LucideMoreHorizontal } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaRegEdit, FaRegFlag } from 'react-icons/fa';
 import { LuCalendarDays, LuCheck, LuChevronDown, LuCircle, LuCircleDot, LuDownload, LuFileImage, LuFlag, LuFolderPlus, LuLightbulb, LuMessageCircle, LuPaperclip, LuPlus, LuSearch, LuSend, LuTag, LuUsers, LuX } from 'react-icons/lu';
@@ -13,6 +13,7 @@ import { DndContext } from "@dnd-kit/core";
 import TaskCard from './TaskCard.jsx';
 import DroppableColumn from './dropeableColumn.jsx';
 const ProjectDetailsTask = ({ project }) => {
+    const { _id: projectId } = project;
     // console.log(project)
     // search Task 
     const [search, setSearch] = useState('')
@@ -39,6 +40,20 @@ const ProjectDetailsTask = ({ project }) => {
         reset: resetCreate,
         formState: { errors: createErrors }
     } = useForm();
+
+    // get member for assign task 
+      // get members speific project 
+        const { data: members=[] } = useQuery({
+            queryKey:['projectMembers', projectId],
+            queryFn: async () => {
+                const res = await axiosSecure.get(`/project-members/${projectId}`)
+                // console.log(res);
+                return res.data;
+            },
+            enabled: !!projectId
+    
+        })
+        
     // Post or create task 
     // using tanstak library usemutation for refetch ui
     const queryClient = useQueryClient();
@@ -73,7 +88,7 @@ const ProjectDetailsTask = ({ project }) => {
     })
     // post modal form 
     const postSubmit = (data) => {
-        // console.log(data)
+        console.log(data)
         postTaskMutation.mutate(data);
         openaddTaskModalRef.current.close()
     }
@@ -143,6 +158,18 @@ const ProjectDetailsTask = ({ project }) => {
         // console.log(task)
         openEditTaskModalRef.current.showModal();
     }
+    // for refresgh after assign member or edit for seletedTask 
+    useEffect(() => {
+        if (!selectedTask) return;
+
+        const updatedSelectedTask = projectTasks.find(
+            task => task._id === selectedTask._id
+        );
+
+        if (updatedSelectedTask) {
+            setSelectedTask(updatedSelectedTask);
+        }
+    }, [projectTasks, selectedTask?._id,selectedTask]);
      // update api use useMutation 
         const updateTaskMutation = useMutation({
             mutationFn: async ({id, taskData}) => {
@@ -1068,43 +1095,79 @@ const ProjectDetailsTask = ({ project }) => {
                                                     </div>
 
                                                 </div>
-                                                <div>
-                                                    <label className="mb-2 block text-sm font-semibold text-base-content">
-                                                        Status
-                                                    </label>
+                                                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                            Status
+                                                        </label>
 
-                                                    <div className="relative">
+                                                        <div className="relative">
 
-                                                        <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
+                                                            <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
 
-                                                        <select
-                                                            className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-                                                            {...registerCreate("status")}
-                                                        >
-                                                            <option value="To Do">
-                                                                To Do
-                                                            </option>
+                                                            <select
+                                                                className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                                {...registerCreate("status")}
+                                                            >
+                                                                <option value="To Do">
+                                                                    To Do
+                                                                </option>
 
-                                                            <option value="In Progress">
-                                                                In Progress
-                                                            </option>
+                                                                <option value="In Progress">
+                                                                    In Progress
+                                                                </option>
 
-                                                            <option value="Done">
-                                                                Done
-                                                            </option>
+                                                                <option value="Done">
+                                                                    Done
+                                                                </option>
 
-                                                            <option value="Completed">
-                                                                Completed
-                                                            </option>
-                                                        </select>
+                                                                <option value="Completed">
+                                                                    Completed
+                                                                </option>
+                                                            </select>
 
-                                                        <LuChevronDown
-                                                            size={20}
-                                                            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
-                                                        />
+                                                            <LuChevronDown
+                                                                size={20}
+                                                                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                                            />
 
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                            Assign Member
+                                                        </label>
+
+                                                        <div className="relative">
+
+                                                            <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
+
+                                                            <select
+                                                                className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                                {...registerCreate("assignedTo")}
+                                                            >
+                                                                <option value="Unassigned">Unassigned</option>
+
+                                                                {members.map(member => (
+                                                                    <option
+                                                                        key={member._id}
+                                                                        value={member._id}
+                                                                    >
+                                                                        {member.name}
+                                                                    </option>
+                                                                ))}
+                                                                    
+                                                            </select>
+
+                                                            <LuChevronDown
+                                                                size={20}
+                                                                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                                            />
+
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                
                                                 
 
                                             </div>
@@ -1319,43 +1382,80 @@ const ProjectDetailsTask = ({ project }) => {
                                                     </div>
 
                                                 </div>
-                                                <div>
-                                                    <label className="mb-2 block text-sm font-semibold text-base-content">
-                                                        Status
-                                                    </label>
 
-                                                    <div className="relative">
+                                                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                            Status
+                                                        </label>
 
-                                                        <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
+                                                        <div className="relative">
 
-                                                        <select
-                                                            className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-                                                            {...register("status")}
-                                                        >
-                                                            <option value="To Do">
-                                                                To Do
-                                                            </option>
+                                                            <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
 
-                                                            <option value="In Progress">
-                                                                In Progress
-                                                            </option>
+                                                            <select
+                                                                className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                                {...register("status")}
+                                                            >
+                                                                <option value="To Do">
+                                                                    To Do
+                                                                </option>
 
-                                                            <option value="Done">
-                                                                Done
-                                                            </option>
+                                                                <option value="In Progress">
+                                                                    In Progress
+                                                                </option>
 
-                                                            <option value="Completed">
-                                                                Completed
-                                                            </option>
-                                                        </select>
+                                                                <option value="Done">
+                                                                    Done
+                                                                </option>
 
-                                                        <LuChevronDown
-                                                            size={20}
-                                                            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
-                                                        />
+                                                                <option value="Completed">
+                                                                    Completed
+                                                                </option>
+                                                            </select>
 
+                                                            <LuChevronDown
+                                                                size={20}
+                                                                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                                            />
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="mb-2 block text-sm font-semibold text-base-content">
+                                                            Assign Member
+                                                        </label>
+
+                                                        <div className="relative">
+
+                                                            <span className="pointer-events-none absolute left-4 top-1/2 z-10 h-3 w-3 -translate-y-1/2 rounded-full bg-success" />
+
+                                                            <select
+                                                                className="select h-10 w-full appearance-none rounded-xl border border-base-300 bg-base-100 pl-10 pr-10 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                                                                {...register("assignedTo")}
+                                                            >
+                                                                <option value="Unassigned">Unassigned</option>
+
+                                                                {members.map(member => (
+                                                                    <option
+                                                                        key={member._id}
+                                                                        value={member._id}
+                                                                    >
+                                                                        {member.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+
+                                                            <LuChevronDown
+                                                                size={20}
+                                                                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                                            />
+
+                                                        </div>
                                                     </div>
                                                 </div>
+                                               
 
 
                                             </div>

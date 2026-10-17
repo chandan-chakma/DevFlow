@@ -115,7 +115,7 @@ const ProjectDetailsMember = ({ project }) => {
                         </div>
                         <div>
                             <div className="text-2xl font-bold text-base-content">
-                                {/* {members.length} */}
+                                {members.length}
                             </div>
                             <div className="text-sm text-base-content/60">
                                 Total Members
