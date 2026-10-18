@@ -3,8 +3,10 @@ import { AuthContext } from './AuthContext.jsx';
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { auth } from '../Firebase/Firebase.comfig.js';
 import Loading from '../Components/Loading/Loading.jsx';
+import UseAxiosSecures from '../Hooks/UseAxiosSecures.jsx';
 
 const AuthProvider = ({ children }) => {
+    const axiosSecure = UseAxiosSecures();
     // state the user 
     const [user, setUser] = useState(null);
     const [authActionLoading, setAuthActionLoading] = useState(false);
@@ -39,9 +41,21 @@ const AuthProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        const unSubcribe=onAuthStateChanged(auth, (currentUser) => {
+        const unSubcribe=onAuthStateChanged(auth, async(currentUser) => {
             setUser(currentUser);
-            setLoading(false);
+            try {
+                if (currentUser) {
+                    const res = await axiosSecure.post('/getToken', {
+                        email: currentUser.email
+                    });
+
+                    console.log('Token response:', res.data);
+                }
+            } catch (error) {
+                console.error('Failed to get token:', error);
+            } finally {
+                setLoading(false);
+            }
         });
         return () => {
             unSubcribe();
