@@ -312,6 +312,7 @@ const ProjectDetailsTask = ({ project }) => {
             const res = await axiosSecure.get(
                 `/tasks/${selectedTask._id}/comments`
             );
+            console.log(res)
             return res.data;
         }
 
@@ -1837,7 +1838,7 @@ const ProjectDetailsTask = ({ project }) => {
                                                                 <div className="flex flex-wrap items-center gap-2">
 
                                                                     <p className="text-xs font-semibold">
-                                                                        Sarah Khan
+                                                                        {comment.user.displayName}
                                                                     </p>
 
                                                                     <span className="text-[10px] text-muted">

@@ -95,8 +95,8 @@ const ProjectsShow = () => {
                         <button onClick={() => handleStatusProject('active')} className={`btn ${status === 'active' ? 'btn-primary' : 'bg-[#FEFFFE]'} rounded-xl`}>Active</button>
                     </div>
                     <div className="indicator">
-                        <span className="indicator-item badge badge-secondary">12</span>
-                        <button className="btn bg-[#FEFFFE] rounded-xl">In Progress</button>
+                        <span className="indicator-item badge badge-secondary">{getStatusCount('in progress')}</span>
+                        <button onClick={() => handleStatusProject('completed')} className={`btn ${status === 'completed' ? 'btn-primary' : 'bg-[#FEFFFE]'} rounded-xl`}>In progress</button>
                     </div>
                     <div className="indicator">
                         <span className="indicator-item badge badge-secondary">{getStatusCount('completed')}</span>
