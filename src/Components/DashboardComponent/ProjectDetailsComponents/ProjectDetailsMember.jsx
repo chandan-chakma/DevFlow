@@ -204,7 +204,7 @@ const ProjectDetailsMember = ({ project }) => {
                             <tbody>
                                 {/* row 1 */}
                                 {
-                                    members.map(member =>
+                                    members.map(member => 
                                         <tr key={member._id}>
                                             <th>
                                                 <label>
@@ -298,7 +298,7 @@ const ProjectDetailsMember = ({ project }) => {
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <div className="font-bold">{user.name}</div>
+                                                        <div className="font-bold">{user?.displayName}</div>
                                                         <div className="text-sm opacity-50">United States</div>
                                                     </div>
                                                 </div>

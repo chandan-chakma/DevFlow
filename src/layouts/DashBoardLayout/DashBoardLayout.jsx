@@ -9,9 +9,24 @@ import { FaAngleDown, FaRegCalendarCheck } from 'react-icons/fa';
 import { GrAnalytics } from 'react-icons/gr';
 import { AiOutlineSetting } from 'react-icons/ai';
 import UseAuth from '../../Hooks/UseAuth.jsx';
-;
+import UseAxiosSecures from '../../Hooks/UseAxiosSecures.jsx';
+import { useQuery } from '@tanstack/react-query'; 
+import { formatDistanceToNow } from "date-fns";
+import { IoIosNotifications } from 'react-icons/io';
 const DashBoardLayout = () => {
     const { user } = UseAuth();
+    const axiosSecure = UseAxiosSecures();
+    // get the notification data 
+    const {data:notifications=[] } = useQuery({
+        queryKey: ['notifications'],
+        queryFn: async () => {
+            const res = await axiosSecure.get('/notifications')
+            console.log(res);
+            return res.data;
+        },
+        enabled: !!user,
+    })
+
     return (
         <div className='max-w-7xl mx-auto px-6 py-4'>
             <div className="drawer lg:drawer-open">
@@ -46,18 +61,36 @@ const DashBoardLayout = () => {
                                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
                                         <div className="indicator">
                                             <svg aria-label="Notifications" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /> </svg>
-                                            <span className="badge badge-xs badge-primary indicator-item"></span>
+                                            <span className="badge badge-xs badge-primary indicator-item">1</span>
                                         </div>
                                     </div>
                                     <div
                                         tabIndex={0}
                                         className="card card-sm dropdown-content bg-base-100 z-1 mt-3 w-52 shadow">
                                         <div className="card-body">
-                                            <span className="text-lg font-bold">8 Items</span>
-                                            <span className="text-info">Subtotal: $999</span>
-                                            <div className="card-actions">
-                                                <button className="btn btn-primary btn-block">View cart</button>
-                                            </div>
+                                            {
+                                                notifications.map(notification =>
+                                                    <Link>
+                                                        <div className='flex justify-center'>
+                                                            <div>
+                                                                <IoIosNotifications size={18}
+                                                                className='text-secondary'/>
+                                                            </div>
+                                                            <div>
+                                                                <p>
+                                                                    {notification.message}
+                                                                </p>
+                                                                <p className="text-xs text-base-content/60 mt-1">
+                                                                    {formatDistanceToNow(new Date(notification.createdAt), {
+                                                                        addSuffix: true,
+                                                                    })}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                  
+                                                    </Link>
+                                                   )
+                                            }
                                         </div>
                                     </div>
                                 </div>

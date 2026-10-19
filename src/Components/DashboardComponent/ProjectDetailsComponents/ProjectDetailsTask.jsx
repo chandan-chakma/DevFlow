@@ -60,7 +60,7 @@ const ProjectDetailsTask = ({ project }) => {
     const postTaskMutation = useMutation({
         mutationFn: async (postTask) => {
             const res = await axiosSecure.post(`/projects/${id}/tasks`,postTask)
-            // console.log(res);
+            console.log(res);
             return res.data;
         },
         onSuccess: (data) => {
@@ -1838,7 +1838,7 @@ const ProjectDetailsTask = ({ project }) => {
                                                                 <div className="flex flex-wrap items-center gap-2">
 
                                                                     <p className="text-xs font-semibold">
-                                                                        {comment.user.displayName}
+                                                                        {comment.user?.displayName}
                                                                     </p>
 
                                                                     <span className="text-[10px] text-muted">
