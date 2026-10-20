@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Outlet } from 'react-router';
+import { Link, Outlet, useNavigate } from 'react-router';
 import { GoFileDirectory } from 'react-icons/go';
 import Logo from '../../Components/Logo/Logo.jsx';
 import Logoimg from '../../assets/images/logo.png'
@@ -10,12 +10,13 @@ import { GrAnalytics } from 'react-icons/gr';
 import { AiOutlineSetting } from 'react-icons/ai';
 import UseAuth from '../../Hooks/UseAuth.jsx';
 import UseAxiosSecures from '../../Hooks/UseAxiosSecures.jsx';
-import { useQuery } from '@tanstack/react-query'; 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'; 
 import { formatDistanceToNow } from "date-fns";
 import { IoIosNotifications } from 'react-icons/io';
 const DashBoardLayout = () => {
     const { user } = UseAuth();
     const axiosSecure = UseAxiosSecures();
+    const navigate = useNavigate();
     // get the notification data 
     const {data:notifications=[] } = useQuery({
         queryKey: ['notifications'],
@@ -26,6 +27,42 @@ const DashBoardLayout = () => {
         },
         enabled: !!user,
     })
+    // calculate unread notificatio 
+    const unreadCount = notifications.filter(
+        (notification) => !notification.isRead
+    ).length;
+
+    // mark as read update notification 
+    const queryClient = useQueryClient();
+    const markAsReadMutation = useMutation({
+        mutationFn: async (notificationId) => {
+            const res = await axiosSecure.patch(`/notifications/${notificationId}/read`);
+            console.log(res);
+            return res.data;
+        },
+          onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["notifications"]
+            });
+        },
+
+        onError: (error) => {
+            console.error(
+                "Failed to mark notification as read:",
+                error.response?.data || error.message
+            );
+        }
+    })
+    // read onlcick handler 
+    const handleReadNotification = async (notification) => {
+        try {
+            if (!notification.isRead) {
+                await markAsReadMutation.mutateAsync(notification._id);
+            }
+        } catch (error) {
+            console.error("Failed to handle notification:", error);
+        }
+    };
 
     return (
         <div className='max-w-7xl mx-auto px-6 py-4'>
@@ -60,37 +97,51 @@ const DashBoardLayout = () => {
                                 <div className="dropdown dropdown-end">
                                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
                                         <div className="indicator">
-                                            <svg aria-label="Notifications" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /> </svg>
-                                            <span className="badge badge-xs badge-primary indicator-item">1</span>
+                                            <svg  aria-label="Notifications" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /> </svg>
+                                            {unreadCount > 0 && (
+                                                <span className="badge badge-sm badge-error indicator-item">
+                                                    {unreadCount > 99 ? "99+" : unreadCount}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                     <div
                                         tabIndex={0}
-                                        className="card card-sm dropdown-content bg-base-100 z-1 mt-3 w-52 shadow">
+                                        className="card card-sm dropdown-content bg-base-100 z-4 mt-3 w-52 shadow">
                                         <div className="card-body">
-                                            {
-                                                notifications.map(notification =>
-                                                    <Link>
-                                                        <div className='flex justify-center'>
-                                                            <div>
-                                                                <IoIosNotifications size={18}
-                                                                className='text-secondary'/>
-                                                            </div>
-                                                            <div>
-                                                                <p>
-                                                                    {notification.message}
-                                                                </p>
-                                                                <p className="text-xs text-base-content/60 mt-1">
-                                                                    {formatDistanceToNow(new Date(notification.createdAt), {
-                                                                        addSuffix: true,
-                                                                    })}
-                                                                </p>
-                                                            </div>
+                                            {notifications.map((notification) => (
+                                                <button
+                                                    key={notification._id}
+                                                    type="button"
+                                                    onClick={() => handleReadNotification(notification)}
+                                                    className={`w-full rounded-lg p-3 text-left hover:bg-base-200 ${!notification.isRead ? "bg-primary/10" : ""
+                                                        }`}
+                                                >
+                                                    <div className="flex items-start gap-2">
+                                                        <IoIosNotifications
+                                                            size={18}
+                                                            className="shrink-0 text-secondary"
+                                                        />
+
+                                                        <div>
+                                                            <p className="text-sm">
+                                                                {notification.message}
+                                                            </p>
+
+                                                            <p className="mt-1 text-xs text-base-content/60">
+                                                                {formatDistanceToNow(
+                                                                    new Date(notification.createdAt),
+                                                                    { addSuffix: true }
+                                                                )}
+                                                            </p>
                                                         </div>
-                                                  
-                                                    </Link>
-                                                   )
-                                            }
+
+                                                        {!notification.isRead && (
+                                                            <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
