@@ -12,6 +12,7 @@ import { MdDelete } from 'react-icons/md';
 import { DndContext } from "@dnd-kit/core";
 import TaskCard from './TaskCard.jsx';
 import DroppableColumn from './dropeableColumn.jsx';
+import socket from '../../../Socket/socket.js';
 const ProjectDetailsTask = ({ project }) => {
     const { _id: projectId } = project;
     // console.log(project)
@@ -105,6 +106,47 @@ const ProjectDetailsTask = ({ project }) => {
             return res.data;
         }
     })
+    // sockt io 
+    useEffect(() => {
+        const handleTaskUpdated = (updatedTask) => {
+            // Refresh task queries for this project only
+            queryClient.invalidateQueries({
+                queryKey: ['project-tasks', id],
+            });
+        };
+
+        socket.on('task-updated', handleTaskUpdated);
+
+        const handleTaskCreated = () => {
+            queryClient.invalidateQueries({
+                queryKey: ['project-tasks', id],
+            });
+        };
+
+        socket.on('task-created', handleTaskCreated);
+
+        const handleTaskDeleted = ({ taskId }) => {
+            // Refresh all task queries for this project
+            queryClient.invalidateQueries({
+                queryKey: ['project-tasks', id]
+            });
+
+            // Close the selected task if another member deleted it
+            setSelectedTask((current) =>
+                current?._id === taskId ? null : current
+            );
+        };
+
+        socket.on('task-deleted', handleTaskDeleted);
+
+        return () => {
+            socket.off('task-updated', handleTaskUpdated);
+            socket.off('task-created', handleTaskCreated);
+            socket.off('task-deleted', handleTaskDeleted);
+
+        };
+    },
+        [id, queryClient]);
     const tasks = {
         todo: projectTasks.filter(task => task.status === 'To Do'),
         inProgress: projectTasks.filter(task => task.status === 'In Progress'),

@@ -10,6 +10,7 @@ import ProjectDetailsOverview from '../../../Components/DashboardComponent/Proje
 import ProjectDetailsTask from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsTask.jsx';
 import ProjectDetailsActivity from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsActivity.jsx';
 import ProjectDetailsMember from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsMember.jsx';
+import socket from '../../../Socket/socket.js';
 
 const ProjectDetails = () => {
     const { id } = useParams();
@@ -17,6 +18,42 @@ const ProjectDetails = () => {
     // tab 
     const [activeTab, setActiveTab] = useState('overview');
     // const [project, setProject] = useState([]);
+    //   connect socket io real time update 
+
+//  reail time socket io 
+    useEffect(() => {
+        if (!id) return;
+
+        const joinProjectRoom = () => {
+            socket.emit('join-project', id, (response) => {
+                if (response?.success) {
+                    console.log('Joined project room:', response.room);
+                } else {
+                    console.error(
+                        'Failed to join project room:',
+                        response?.message
+                    );
+                }
+            });
+        };
+
+        if (socket.connected) {
+            joinProjectRoom();
+        } else {
+            socket.connect();
+            socket.once('connect', joinProjectRoom);
+        }
+
+        return () => {
+            socket.off('connect', joinProjectRoom);
+
+            if (socket.connected) {
+                socket.emit('leave-project', id);
+            }
+        };
+    }, [id]);
+
+
     // get data for single project 
     const {data:project,isLoading } = useQuery({
         queryKey: ['project', id],
@@ -31,6 +68,9 @@ const ProjectDetails = () => {
         return <Loading></Loading>
 
     }
+
+  
+    
     // useEffect(() => {
     //     const res = axiosSecure.get(`/dashboard/projects/${id}`)
     //     console.log(res)
@@ -47,6 +87,7 @@ const ProjectDetails = () => {
         return formattedDate;
         
     }
+   
   
     return (
         <div>

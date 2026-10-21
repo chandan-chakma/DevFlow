@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router';
 import { GoFileDirectory } from 'react-icons/go';
 import Logo from '../../Components/Logo/Logo.jsx';
@@ -13,10 +13,27 @@ import UseAxiosSecures from '../../Hooks/UseAxiosSecures.jsx';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'; 
 import { formatDistanceToNow } from "date-fns";
 import { IoIosNotifications } from 'react-icons/io';
+import socket from '../../Socket/socket.js';
 const DashBoardLayout = () => {
     const { user } = UseAuth();
     const axiosSecure = UseAxiosSecures();
     const navigate = useNavigate();
+    // socket io 
+    useEffect(() => {
+        if (!user) return;
+        socket.connect();
+        socket.on("connect", () => {
+            console.log("connected to Socket.IO:", socket.id);
+        })
+        socket.on("disconnect", (reason) => {
+            console.log('Socket disconnected:', reason)
+        });
+        return () => {
+            socket.off('connect');
+            socket.off('disconnect');
+            socket.disconnect();
+        }
+    },[user])
     // get the notification data 
     const {data:notifications=[] } = useQuery({
         queryKey: ['notifications'],
@@ -26,6 +43,8 @@ const DashBoardLayout = () => {
             return res.data;
         },
         enabled: !!user,
+        // do not need after user socket.io 
+        // refetchInterval: 10000
     })
     // calculate unread notificatio 
     const unreadCount = notifications.filter(
@@ -34,6 +53,29 @@ const DashBoardLayout = () => {
 
     // mark as read update notification 
     const queryClient = useQueryClient();
+    useEffect(() => {
+        if (!user) return;
+        const handleNewNotification = (notification) => {
+            queryClient.setQueryData(['notifications'],
+                (oldNotifications = []) => {
+                    // Prevent duplicate notifications
+                    const alreadyExists = oldNotifications.some(
+                        (item) => item._id === notification._id
+                    );
+                    if (alreadyExists) {
+                        return oldNotifications;
+                    }
+                    // Add newest notification to the beginning
+                    return [notification, ...oldNotifications].slice(0, 5);
+                })
+        };
+        socket.on('notification', handleNewNotification);
+        return () => {
+            socket.off('notification', handleNewNotification);
+        };
+    }, [user, queryClient])
+    
+
     const markAsReadMutation = useMutation({
         mutationFn: async (notificationId) => {
             const res = await axiosSecure.patch(`/notifications/${notificationId}/read`);
@@ -157,7 +199,7 @@ const DashBoardLayout = () => {
                                         </div>
 
                                         <div>
-                                            <h1 className='text-neutral text-lg'>{user.displayName}</h1>
+                                            <h1 className='text-neutral text-lg'>{user?.displayName}</h1>
                                             <p className='text-muted text-sm'>Frontend Developer</p>
                                             
                                         </div>
