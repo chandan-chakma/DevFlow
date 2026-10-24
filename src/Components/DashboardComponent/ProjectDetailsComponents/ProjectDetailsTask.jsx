@@ -61,7 +61,7 @@ const ProjectDetailsTask = ({ project }) => {
     const postTaskMutation = useMutation({
         mutationFn: async (postTask) => {
             const res = await axiosSecure.post(`/projects/${id}/tasks`,postTask)
-            console.log(res);
+            // console.log(res);
             return res.data;
         },
         onSuccess: (data) => {
@@ -89,7 +89,7 @@ const ProjectDetailsTask = ({ project }) => {
     })
     // post modal form 
     const postSubmit = (data) => {
-        console.log(data)
+        // console.log(data)
         postTaskMutation.mutate(data);
         openaddTaskModalRef.current.close()
     }
@@ -98,26 +98,22 @@ const ProjectDetailsTask = ({ project }) => {
     // ---------------------------------------------------------
 
     // get specific project tasks data
-    const {data:projectTasks=[] } = useQuery({
+    const { data: projectTasks = [] } = useQuery({
+       
         queryKey: ['project-tasks',id,search,priority,sort],
         queryFn: async () => {
+            // console.log('📡 Fetching tasks for project:', id);
             const res = await axiosSecure.get(`projects/${id}/tasks?searchText=${search}&priority=${priority}&sort=${sort}`)
             // console.log(res);
+            // console.log('✅ Tasks fetched:', res.data);
             return res.data;
         }
     })
     // sockt io 
     useEffect(() => {
-        const handleTaskUpdated = (updatedTask) => {
-            // Refresh task queries for this project only
-            queryClient.invalidateQueries({
-                queryKey: ['project-tasks', id],
-            });
-        };
+        const handleTaskCreated = (createdTask) => {
+            // console.log('🆕 Task created event received:', createdTask);
 
-        socket.on('task-updated', handleTaskUpdated);
-
-        const handleTaskCreated = () => {
             queryClient.invalidateQueries({
                 queryKey: ['project-tasks', id],
             });
@@ -127,6 +123,7 @@ const ProjectDetailsTask = ({ project }) => {
 
         const handleTaskDeleted = ({ taskId }) => {
             // Refresh all task queries for this project
+            // console.log("🗑️ task-deleted received:", taskId);
             queryClient.invalidateQueries({
                 queryKey: ['project-tasks', id]
             });
@@ -139,19 +136,63 @@ const ProjectDetailsTask = ({ project }) => {
 
         socket.on('task-deleted', handleTaskDeleted);
 
+        const handleTaskUpdated = (updatedTask) => {
+            // console.log('🔄 Task updated:', updatedTask);
+            console.log('🔄 task-updated received in browser:', updatedTask);
+
+            queryClient.invalidateQueries({
+                queryKey: ['project-tasks', id],
+            });
+
+            setSelectedTask((current) =>
+                current?._id === updatedTask._id
+                    ? updatedTask
+                    : current
+            );
+        };
+
+        socket.on('task-updated', handleTaskUpdated);
+
+        
+        const handleNewComment = (comment) => {
+            console.log('🔔 New comment event received:', comment);
+
+            const taskId = comment?.taskId?.toString();
+
+            if (!taskId) {
+                console.log('❌ Comment has no taskId');
+                return;
+            }
+
+            queryClient.invalidateQueries({
+                queryKey: ['taskComments', taskId],
+            });
+        };
+
+        socket.on('new-comment', handleNewComment);
+
+        // console.log('👂 Registering task listeners');
+        // console.log('Task component socket ID:', socket.id);
+        // console.log('Task component socket connected:', socket.connected);
+
         return () => {
-            socket.off('task-updated', handleTaskUpdated);
+           
             socket.off('task-created', handleTaskCreated);
             socket.off('task-deleted', handleTaskDeleted);
+            socket.off('task-updated', handleTaskUpdated);
+            socket.off('new-comment', handleNewComment);
 
         };
     },
-        [id, queryClient]);
+        [ id,queryClient]);
+    
+    
     const tasks = {
         todo: projectTasks.filter(task => task.status === 'To Do'),
         inProgress: projectTasks.filter(task => task.status === 'In Progress'),
         done: projectTasks.filter(task => task.status === 'Done')
     };
+
 
     // filter task data
     // firt search task data 
@@ -190,6 +231,7 @@ const ProjectDetailsTask = ({ project }) => {
     const openEditTaskModalRef = useRef();
    
     const handleEditTaskModal = (task) => {
+        setSelectedTask(task);
         reset({
             title: task.title,
             description: task.description,
@@ -218,19 +260,29 @@ const ProjectDetailsTask = ({ project }) => {
                 const res = await axiosSecure.patch(`/tasks/${id}`,taskData)
                 return res.data
             }, 
-            onSuccess: (data) => {
-                queryClient.invalidateQueries({ queryKey: ['project-tasks'] })
-                if (data.modifiedCount) {
-                    Swal.fire({
-                        title: "Updated!",
-                        text: "Task has been updated successfully.",
-                        icon: "success"
-                    });
-                }
+            oonSuccess: (data) => {
+                // console.log("Update response received:", data);
+
+                queryClient.invalidateQueries({
+                    queryKey: ['project-tasks', id]
+                });
+
+                Swal.fire({
+                    title: "Updated!",
+                    text: "Task has been updated successfully.",
+                    icon: "success"
+                });
             }
         })
 
     const updateSubmit = (data) => {
+        if (!selectedTask?._id) {
+            console.error("No task selected for editing");
+            return;
+        }
+
+        // console.log("Editing task ID:", selectedTask._id);
+        // console.log("Updated task data:", data);
         updateTaskMutation.mutate({
             id: selectedTask._id,
             taskData: data
@@ -354,7 +406,7 @@ const ProjectDetailsTask = ({ project }) => {
             const res = await axiosSecure.get(
                 `/tasks/${selectedTask._id}/comments`
             );
-            console.log(res)
+            // console.log(res)
             return res.data;
         }
 

@@ -25,27 +25,47 @@ const ProjectDetails = () => {
         if (!id) return;
 
         const joinProjectRoom = () => {
+            console.log('📥 Requesting project room:', id);
+
             socket.emit('join-project', id, (response) => {
+                console.log('📨 Join room response:', response);
+
                 if (response?.success) {
-                    console.log('Joined project room:', response.room);
+                    console.log('✅ Joined project room:', response.room);
                 } else {
-                    console.error(
-                        'Failed to join project room:',
-                        response?.message
-                    );
+                    console.error('❌ Failed to join project room:', response?.message);
                 }
             });
         };
 
+        const handleConnect = () => {
+            console.log('🟢 Socket connected:', socket.id);
+            joinProjectRoom();
+        };
+
+        const handleConnectError = (error) => {
+            console.error('❌ Socket connection error:', error.message);
+        };
+
+        const handleDisconnect = (reason) => {
+            console.log('🔴 Socket disconnected:', reason);
+        };
+
+        socket.on('connect', handleConnect);
+        socket.on('connect_error', handleConnectError);
+        socket.on('disconnect', handleDisconnect);
+
         if (socket.connected) {
+            console.log('🟢 Socket already connected:', socket.id);
             joinProjectRoom();
         } else {
             socket.connect();
-            socket.once('connect', joinProjectRoom);
         }
 
         return () => {
-            socket.off('connect', joinProjectRoom);
+            socket.off('connect', handleConnect);
+            socket.off('connect_error', handleConnectError);
+            socket.off('disconnect', handleDisconnect);
 
             if (socket.connected) {
                 socket.emit('leave-project', id);
@@ -59,7 +79,7 @@ const ProjectDetails = () => {
         queryKey: ['project', id],
         queryFn: async () => {
             const res = await axiosSecure.get(`/projects/${id}`)
-            console.log(res)
+            // console.log(res)
             return res.data;
         }
     })

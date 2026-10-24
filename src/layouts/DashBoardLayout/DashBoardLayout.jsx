@@ -21,25 +21,36 @@ const DashBoardLayout = () => {
     // socket io 
     useEffect(() => {
         if (!user) return;
-        socket.connect();
-        socket.on("connect", () => {
-            console.log("connected to Socket.IO:", socket.id);
-        })
-        socket.on("disconnect", (reason) => {
-            console.log('Socket disconnected:', reason)
-        });
-        return () => {
-            socket.off('connect');
-            socket.off('disconnect');
-            socket.disconnect();
+
+        const handleConnect = () => {
+            console.log("Connected to Socket.IO:", socket.id);
+        };
+
+        const handleDisconnect = (reason) => {
+            console.log("Socket disconnected:", reason);
+        };
+
+        socket.on("connect", handleConnect);
+        socket.on("disconnect", handleDisconnect);
+
+        if (!socket.connected) {
+            socket.connect();
         }
-    },[user])
+
+        return () => {
+            socket.off("connect", handleConnect);
+            socket.off("disconnect", handleDisconnect);
+
+            // Don't disconnect here.
+            // ProjectDetails also uses this shared socket.
+        };
+    }, [user]);
     // get the notification data 
     const {data:notifications=[] } = useQuery({
         queryKey: ['notifications'],
         queryFn: async () => {
             const res = await axiosSecure.get('/notifications')
-            console.log(res);
+            // console.log(res);/
             return res.data;
         },
         enabled: !!user,
@@ -66,7 +77,7 @@ const DashBoardLayout = () => {
                         return oldNotifications;
                     }
                     // Add newest notification to the beginning
-                    return [notification, ...oldNotifications].slice(0, 5);
+                    return [notification, ...oldNotifications];
                 })
         };
         socket.on('notification', handleNewNotification);
