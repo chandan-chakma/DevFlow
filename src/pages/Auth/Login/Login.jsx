@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import logo from '../../../assets/images/logo.png'
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import login from '../../..//assets/images/login.png'
 import { FaChartLine, FaCheckCircle, FaRegEyeSlash, FaUserFriends } from 'react-icons/fa';
 import { IoEyeOutline, IoLockClosedOutline } from 'react-icons/io5';
@@ -15,6 +15,7 @@ import UseAuth from '../../../Hooks/UseAuth.jsx';
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false); 
     const navigate = useNavigate()
+    const location = useLocation();
     const { signInWithEmail } = UseAuth()
     // react hook form 
     const { register, setError, formState: { errors }, handleSubmit } = useForm();
@@ -22,8 +23,8 @@ const Login = () => {
         // console.log(data);
         signInWithEmail(data.email, data.password)
             .then(result => {
-                console.log(result);
-                navigate('/dashboard')
+                // console.log(result);
+                navigate(location?.state || '/dashboard')
                 
             })
             .catch(error => {

@@ -13,6 +13,7 @@ import Calendar from "../pages/DashBoard/Calendar/Calendar.jsx";
 import Analytics from "../pages/DashBoard/Analytics/Analytics.jsx";
 import Settings from "../pages/DashBoard/Settings/Settings.jsx";
 import ProjectDetails from "../pages/DashBoard/Projects/ProjectDetails.jsx";
+import PrivateRoute from "./PrivateRoute.jsx";
 
 export const router = createBrowserRouter([
     {
@@ -43,7 +44,9 @@ export const router = createBrowserRouter([
 
     {
         path: '/dashboard',
-        Component: DashBoardLayout,
+        element: <PrivateRoute>
+            <DashBoardLayout></DashBoardLayout>
+        </PrivateRoute>,
         children: [
             {
                 index: true,
