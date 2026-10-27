@@ -307,10 +307,10 @@ const DashBoardLayout = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link to='/dashboard/analytics' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Analytics">
+                                <Link to='/dashboard/calendar' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Calendar">
                                     <GrAnalytics size={18}
                                     strokeWidth={1}/>
-                                    <span className="is-drawer-close:hidden">Analytics</span>
+                                    <span className="is-drawer-close:hidden">Calendar</span>
                                 </Link>
                             </li>
                             <li>
