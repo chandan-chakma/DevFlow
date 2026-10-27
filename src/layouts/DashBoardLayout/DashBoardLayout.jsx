@@ -299,11 +299,11 @@ const DashBoardLayout = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link to='/dashboard/calendar' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Calendar">
+                                <Link to='/dashboard/activity' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Activity">
                                     <FaRegCalendarCheck
                                         size={18}
                                     strokeWidth={1}/>
-                                    <span className="is-drawer-close:hidden">Calendar</span>
+                                    <span className="is-drawer-close:hidden">Activity</span>
                                 </Link>
                             </li>
                             <li>

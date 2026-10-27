@@ -9,11 +9,11 @@ import DashBoardLayout from '../layouts/DashBoardLayout/DashBoardLayout.jsx'
 import DashBoardHome from '../pages/DashBoard/DashBoardHome/DashBoardHome.jsx'
 import Tasks from "../pages/DashBoard/Tasks/Tasks.jsx";
 import Team from "../pages/DashBoard/Team/Team.jsx";
-import Calendar from "../pages/DashBoard/Calendar/Calendar.jsx";
 import Analytics from "../pages/DashBoard/Analytics/Analytics.jsx";
 import Settings from "../pages/DashBoard/Settings/Settings.jsx";
 import ProjectDetails from "../pages/DashBoard/Projects/ProjectDetails.jsx";
 import PrivateRoute from "./PrivateRoute.jsx";
+import Activity from "../pages/DashBoard/Activity/Activity.jsx";
 
 export const router = createBrowserRouter([
     {
@@ -70,8 +70,8 @@ export const router = createBrowserRouter([
                 Component:Team
             },
             {
-                path: '/dashboard/calendar',
-                Component:Calendar
+                path: '/dashboard/activity',
+                Component:Activity
             },
             {
                 path: '/dashboard/analytics',

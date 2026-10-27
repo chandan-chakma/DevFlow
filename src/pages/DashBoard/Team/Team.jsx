@@ -1,526 +1,679 @@
-import React, { useState } from 'react';
+
+import React, { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
     Users,
-    Search,
     CalendarCheck,
     ChartNoAxesColumn,
     FolderKanban,
-    ChevronRight,
-    SlidersHorizontal,
+    Search,
+    ChevronDown,
+    Mail,
+    CircleAlert,
     CheckCircle2,
     Clock3,
-    AlertCircle,
-} from 'lucide-react';
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
-import { FaUserGroup } from 'react-icons/fa6';
-import { FiUsers } from 'react-icons/fi';
-import { BiTask } from 'react-icons/bi';
-import { TfiAlarmClock } from 'react-icons/tfi';
-import { RiProjectorLine } from 'react-icons/ri';
+    BriefcaseBusiness,
+    RefreshCw,
+    UserRound,
+} from "lucide-react";
 
-const teamMembers = [
+// Adjust this path to match your project structure.
+import UseAxiosSecures from "../../../Hooks/UseAxiosSecures.jsx";
+
+const summaryCardConfig = [
     {
-        id: 1,
-        name: 'Alex Morgan',
-        role: 'Manager',
-        avatar: 'https://i.pravatar.cc/100?img=12',
-        projects: ['DevFlow Website', 'AI Dashboard'],
-        openTasks: 5,
-        inProgress: 3,
-        completed: 12,
-        overdue: 2,
-        online: true,
+        label: "Total Members",
+        key: "totalMembers",
+        icon: Users,
+        iconStyle: "bg-primary/10 text-primary",
     },
     {
-        id: 2,
-        name: 'Jamie Lee',
-        role: 'Developer',
-        avatar: 'https://i.pravatar.cc/100?img=47',
-        projects: ['DevFlow Website', 'AI Dashboard', 'Mobile App'],
-        openTasks: 4,
-        inProgress: 2,
-        completed: 8,
-        overdue: 1,
-        online: true,
+        label: "Active Tasks",
+        key: "activeTasks",
+        icon: CalendarCheck,
+        iconStyle: "bg-success/10 text-success",
     },
     {
-        id: 3,
-        name: 'Taylor Chen',
-        role: 'Developer',
-        avatar: 'https://i.pravatar.cc/100?img=11',
-        projects: ['DevFlow Website'],
-        openTasks: 2,
-        inProgress: 1,
-        completed: 5,
-        overdue: 0,
-        online: true,
+        label: "Overdue Tasks",
+        key: "overdueTasks",
+        icon: ChartNoAxesColumn,
+        iconStyle: "bg-error/10 text-error",
     },
     {
-        id: 4,
-        name: 'Morgan Reed',
-        role: 'Developer',
-        avatar: 'https://i.pravatar.cc/100?img=44',
-        projects: ['AI Dashboard', 'Mobile App'],
-        openTasks: 3,
-        inProgress: 2,
-        completed: 7,
-        overdue: 1,
-        online: false,
-    },
-    {
-        id: 5,
-        name: 'Casey Wilson',
-        role: 'Developer',
-        avatar: 'https://i.pravatar.cc/100?img=13',
-        projects: ['DevFlow Website'],
-        openTasks: 1,
-        inProgress: 0,
-        completed: 4,
-        overdue: 0,
-        online: true,
-    },
-    {
-        id: 6,
-        name: 'Riley Patel',
-        role: 'Developer',
-        avatar: 'https://i.pravatar.cc/100?img=49',
-        projects: ['AI Dashboard', 'Mobile App'],
-        openTasks: 3,
-        inProgress: 2,
-        completed: 6,
-        overdue: 1,
-        online: false,
-    },
-    {
-        id: 7,
-        name: 'Jordan Kim',
-        role: 'Developer',
-        avatar: 'https://i.pravatar.cc/100?img=60',
-        projects: ['Mobile App'],
-        openTasks: 2,
-        inProgress: 1,
-        completed: 3,
-        overdue: 0,
-        online: true,
-    },
-    {
-        id: 8,
-        name: 'Quinn Foster',
-        role: 'Designer',
-        avatar: 'https://i.pravatar.cc/100?img=45',
-        projects: ['DevFlow Website', 'AI Dashboard'],
-        openTasks: 1,
-        inProgress: 1,
-        completed: 4,
-        overdue: 0,
-        online: false,
+        label: "Projects",
+        key: "totalProjects",
+        icon: FolderKanban,
+        iconStyle: "bg-info/10 text-info",
     },
 ];
 
-const roleStyles = {
-    Manager: 'bg-purple-100 text-purple-700',
-    Developer: 'bg-blue-100 text-blue-700',
-    Designer: 'bg-pink-100 text-pink-700',
+const getInitials = (name = "") => {
+    return name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase();
 };
+
+const getAvatarColor = (name = "") => {
+    const colors = [
+        "bg-primary/15 text-primary",
+        "bg-secondary/15 text-secondary",
+        "bg-success/15 text-success",
+        "bg-warning/15 text-warning",
+        "bg-info/15 text-info",
+    ];
+
+    const index = name
+        .split("")
+        .reduce((total, char) => total + char.charCodeAt(0), 0);
+
+    return colors[index % colors.length];
+};
+
 const Team = () => {
     const axiosSecure = UseAxiosSecures();
-    const [search, setSearch] = useState('');
-    const [selectedRole, setSelectedRole] = useState('All Roles');
-    const [selectedProject, setSelectedProject] = useState('All Projects');
+    const [searchText, setSearchText] = useState("");
+    const [selectedRole, setSelectedRole] = useState("All Roles");
+    const [selectedProject, setSelectedProject] =
+        useState("All Projects");
 
-    const projects = [
-        ...new Set(teamMembers.flatMap((member) => member.projects)),
-    ];
-
-    const filteredMembers = useMemo(() => {
-        return teamMembers.filter((member) => {
-            const matchesSearch =
-                member.name.toLowerCase().includes(search.toLowerCase());
-
-            const matchesRole =
-                selectedRole === 'All Roles' || member.role === selectedRole;
-
-            const matchesProject =
-                selectedProject === 'All Projects' ||
-                member.projects.includes(selectedProject);
-
-            return matchesSearch && matchesRole && matchesProject;
-        });
-    }, [search, selectedRole, selectedProject]);
-
-    const totalActiveTasks = teamMembers.reduce(
-        (total, member) => total + member.openTasks + member.inProgress,
-        0
-    );
-
-    const totalOverdueTasks = teamMembers.reduce(
-        (total, member) => total + member.overdue,
-        0
-    );
-
-    const summaryCards = [
-        {
-            label: 'Total Members',
-            value: teamMembers.length,
-            icon: Users,
-            iconStyle: 'bg-primary/10 text-primary',
-        },
-        {
-            label: 'Active Tasks',
-            value: totalActiveTasks,
-            icon: CalendarCheck,
-            iconStyle: 'bg-success/10 text-success',
-        },
-        {
-            label: 'Overdue Tasks',
-            value: totalOverdueTasks,
-            icon: ChartNoAxesColumn,
-            iconStyle: 'bg-error/10 text-error',
-        },
-        {
-            label: 'Projects',
-            value: projects.length,
-            icon: FolderKanban,
-            iconStyle: 'bg-info/10 text-info',
-        },
-    ];
-    //  get team member summary or team 
+    // Fetch team summary.
     const {
-        data: summary=[],
-        isLoading,
-        isError,
-        error,
+        data: summary,
+        isLoading: summaryLoading,
+        isError: summaryError,
+        refetch: refetchSummary,
     } = useQuery({
-        queryKey: ['team-summary'],
+        queryKey: ["team-summary"],
         queryFn: async () => {
-            const res = await axiosSecure.get('/team/summary');
-            console.log(res.data);
+            const res = await axiosSecure.get("/team/summary");
+            console.log(res)
             return res.data;
         },
     });
 
-    return (
-        <div className="min-h-screen bg-base-200/50 p-4 sm:p-6 lg:p-8">
-            {/* Page heading */}
-            <div className="mb-7 flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                        <Users size={28} />
-                    </div>
+    // Fetch team members.
+    const {
+        data: teamMembers = [],
+        isLoading: membersLoading,
+        isError: membersError,
+        refetch: refetchMembers,
+    } = useQuery({
+        queryKey: ["team-members"],
+        queryFn: async () => {
+            const res = await axiosSecure.get("/team/members");
+            console.log(res)
+            return res.data;
+        },
+    });
 
+    // Build filter options from the real API response.
+    const roles = useMemo(() => {
+        const uniqueRoles = [
+            ...new Set(
+                teamMembers
+                    .map((member) => member.role)
+                    .filter(Boolean)
+            ),
+        ];
+
+        return ["All Roles", ...uniqueRoles.sort()];
+    }, [teamMembers]);
+
+    const projects = useMemo(() => {
+        const uniqueProjects = new Map();
+
+        teamMembers.forEach((member) => {
+            (member.projects || []).forEach((project) => {
+                if (project?.id && project?.name) {
+                    uniqueProjects.set(
+                        String(project.id),
+                        project
+                    );
+                }
+            });
+        });
+
+        return [
+            {
+                id: "All Projects",
+                name: "All Projects",
+            },
+            ...Array.from(uniqueProjects.values()).sort((a, b) =>
+                a.name.localeCompare(b.name)
+            ),
+        ];
+    }, [teamMembers]);
+
+    // Search and filter members.
+    const filteredMembers = useMemo(() => {
+        const normalizedSearch = searchText.trim().toLowerCase();
+
+        return teamMembers.filter((member) => {
+            const name = member.name || "";
+            const email = member.email || "";
+
+            const matchesSearch =
+                name.toLowerCase().includes(normalizedSearch) ||
+                email.toLowerCase().includes(normalizedSearch);
+
+            const matchesRole =
+                selectedRole === "All Roles" ||
+                member.role === selectedRole;
+
+            const matchesProject =
+                selectedProject === "All Projects" ||
+                (member.projects || []).some(
+                    (project) =>
+                        String(project.id) === selectedProject
+                );
+
+            return (
+                matchesSearch &&
+                matchesRole &&
+                matchesProject
+            );
+        });
+    }, [
+        teamMembers,
+        searchText,
+        selectedRole,
+        selectedProject,
+    ]);
+
+    const handleRefresh = () => {
+        refetchSummary();
+        refetchMembers();
+    };
+
+    const isLoading = summaryLoading || membersLoading;
+    const hasError = summaryError || membersError;
+
+    return (
+        <div className="min-h-screen bg-base-200/40 px-4 py-6 md:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl space-y-8">
+
+                {/* Page heading */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-base-content sm:text-3xl">
-                            Team
+                        <div className="mb-2 flex items-center gap-2 text-sm text-base-content/60">
+                            <Users size={16} />
+                            <span>Workspace</span>
+                            <span>/</span>
+                            <span>Team</span>
+                        </div>
+
+                        <h1 className="text-2xl font-bold tracking-tight text-base-content md:text-3xl">
+                            Team Members
                         </h1>
-                        <p className="mt-1 text-sm text-base-content/60 sm:text-base">
-                            People you collaborate with across your projects
+
+                        <p className="mt-2 max-w-2xl text-sm text-base-content/60 md:text-base">
+                            Manage your collaborators, explore shared
+                            projects, and keep track of team progress.
                         </p>
                     </div>
-                </div>
-
-                {/* Summary cards */}
-                <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-                    <div
-                        className="card border border-base-300/60 bg-base-100 shadow-sm"
-                    >
-                        <div className="card-body flex-row items-center gap-2 p-2 sm:p-4">
-                            <div
-                                className='bg-[#E8ECFE] flex h-11 w-11 shrink-0 items-center justify-center rounded-xl'
-                            >
-                                <FiUsers size={22} className='text-primary' />
-                            </div>
-
-                            <div className="min-w-0">
-                                <p className="text-xs text-base-content/60 sm:text-sm">
-                                    Team Member
-                                </p>
-                                <p className="text-2xl font-bold text-base-content">
-                                    {summary.totalMembers}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div
-                        className="card border border-base-300/60 bg-base-100 shadow-sm"
-                    >
-                        <div className="card-body flex-row items-center gap-3 p-3 sm:p-4">
-                            <div
-                                className='bg-[#DAF8EF] flex h-11 w-11 shrink-0 items-center justify-center rounded-xl'
-                            >
-                                <BiTask size={22} className='text-success' />
-                            </div>
-
-                            <div className="min-w-0">
-                                <p className="text-xs text-base-content/60 sm:text-sm">
-                                    Active Task
-                                </p>
-                                <p className="text-2xl font-bold text-base-content">
-                                    {summary.activeTasks}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div
-                        className="card border border-base-300/60 bg-base-100 shadow-sm"
-                    >
-                        <div className="card-body flex-row items-center gap-3 p-3 sm:p-4">
-                            <div
-                                className='bg-#FDE5E6 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl'
-                            >
-                                <TfiAlarmClock size={22} className='text-error' />
-                            </div>
-
-                            <div className="min-w-0">
-                                <p className="text-xs text-base-content/60 sm:text-sm">
-                                    Overdue Tasks
-                                </p>
-                                <p className="text-2xl font-bold text-base-content">
-                                    {summary.overdueTasks}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div
-                        className="card border border-base-300/60 bg-base-100 shadow-sm"
-                    >
-                        <div className="card-body flex-row items-center gap-3 p-3 sm:p-4">
-                            <div
-                                className='bg-[#DDE9FE] flex h-11 w-11 shrink-0 items-center justify-center rounded-xl'
-                            >
-                                <RiProjectorLine size={22} className='text-info' />
-                            </div>
-
-                            <div className="min-w-0">
-                                <p className="text-xs text-base-content/60 sm:text-sm">
-                                    Team Projects
-                                </p>
-                                <p className="text-2xl font-bold text-base-content">
-                                    {summary.totalProjects}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                  
-                        
-                       
-                         
-                
-                </div>
-            </div>
-
-            {/* Search and filters */}
-            <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-base-300/60 bg-base-100 p-3 shadow-sm lg:flex-row lg:items-center">
-                <label className="input input-bordered flex w-full items-center gap-2 bg-base-100 lg:flex-1">
-                    <Search size={19} className="text-base-content/50" />
-
-                    <input
-                        type="text"
-                        placeholder="Search team members..."
-                        className="grow"
-                        value={search}
-                        onChange={(event) => setSearch(event.target.value)}
-                    />
-
-                    {search && (
-                        <button
-                            type="button"
-                            className="btn btn-ghost btn-xs"
-                            onClick={() => setSearch('')}
-                            aria-label="Clear search"
-                        >
-                            ✕
-                        </button>
-                    )}
-                </label>
-
-                <div className="flex flex-col gap-3 sm:flex-row">
-                    <select
-                        className="select select-bordered w-full bg-base-100 sm:w-40"
-                        value={selectedRole}
-                        onChange={(event) => setSelectedRole(event.target.value)}
-                        aria-label="Filter by role"
-                    >
-                        <option>All Roles</option>
-                        <option>Manager</option>
-                        <option>Developer</option>
-                        <option>Designer</option>
-                    </select>
-
-                    <select
-                        className="select select-bordered w-full bg-base-100 sm:w-48"
-                        value={selectedProject}
-                        onChange={(event) => setSelectedProject(event.target.value)}
-                        aria-label="Filter by project"
-                    >
-                        <option>All Projects</option>
-                        {projects.map((project) => (
-                            <option key={project}>{project}</option>
-                        ))}
-                    </select>
 
                     <button
                         type="button"
-                        className="btn btn-outline"
-                        onClick={() => {
-                            setSearch('');
-                            setSelectedRole('All Roles');
-                            setSelectedProject('All Projects');
-                        }}
-                        title="Reset filters"
+                        onClick={handleRefresh}
+                        className="btn btn-outline btn-sm gap-2 self-start sm:self-auto"
                     >
-                        <SlidersHorizontal size={18} />
-                        <span className="sm:hidden">Reset filters</span>
+                        <RefreshCw size={15} />
+                        Refresh
                     </button>
                 </div>
-            </div>
 
-            {/* Results count */}
-            <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-base-content/70">
-                    Team members
-                    <span className="ml-2 badge badge-ghost">
-                        {filteredMembers.length}
-                    </span>
-                </h2>
-            </div>
+                {/* Summary cards */}
+                <section>
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-lg font-semibold">
+                            Team Overview
+                        </h2>
+                    </div>
 
-            {/* Team member cards */}
-            {filteredMembers.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
-                    {filteredMembers.map((member) => (
-                        <div
-                            key={member.id}
-                            className="card border border-base-300/60 bg-base-100 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
-                        >
-                            <div className="card-body gap-5 p-5">
-                                {/* Member information */}
-                                <div className="flex items-start gap-3">
-                                    <div className="avatar relative shrink-0">
-                                        <div className="w-14 rounded-full ring-2 ring-base-200">
-                                            <img src={member.avatar} alt={member.name} />
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        {summaryCardConfig.map((card) => {
+                            const Icon = card.icon;
+                            const value = summary?.[card.key] ?? 0;
+
+                            return (
+                                <div
+                                    key={card.key}
+                                    className="card border border-base-300/70 bg-base-100 shadow-sm transition-shadow hover:shadow-md"
+                                >
+                                    <div className="card-body p-5">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <p className="text-sm text-base-content/60">
+                                                    {card.label}
+                                                </p>
+
+                                                <p className="mt-3 text-3xl font-bold tracking-tight">
+                                                    {summaryLoading
+                                                        ? "—"
+                                                        : value}
+                                                </p>
+                                            </div>
+
+                                            <div
+                                                className={`rounded-xl p-3 ${card.iconStyle}`}
+                                            >
+                                                <Icon size={22} />
+                                            </div>
                                         </div>
 
-                                        <span
-                                            className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-base-100 ${member.online ? 'bg-success' : 'bg-base-300'
-                                                }`}
-                                            title={member.online ? 'Online' : 'Offline'}
-                                        />
-                                    </div>
+                                        {card.key === "overdueTasks" &&
+                                            !summaryLoading &&
+                                            value > 0 && (
+                                                <p className="mt-2 flex items-center gap-1 text-xs text-error">
+                                                    <CircleAlert size={13} />
+                                                    Tasks need attention
+                                                </p>
+                                            )}
 
-                                    <div className="min-w-0 flex-1">
-                                        <h3 className="truncate font-bold text-base-content">
-                                            {member.name}
-                                        </h3>
-
-                                        <span
-                                            className={`mt-1 inline-flex rounded-full px-3 py-1 text-xs font-medium ${roleStyles[member.role] ||
-                                                'bg-base-200 text-base-content'
-                                                }`}
-                                        >
-                                            {member.role}
-                                        </span>
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        className="btn btn-ghost btn-sm btn-square text-base-content/50"
-                                        aria-label={`View ${member.name}`}
-                                        title={`View ${member.name}`}
-                                        onClick={() => {
-                                            // We'll connect this to a member details page later.
-                                            console.log('Selected member:', member);
-                                        }}
-                                    >
-                                        <ChevronRight size={20} />
-                                    </button>
-                                </div>
-
-                                {/* Shared projects */}
-                                <div className="flex items-center gap-2 text-sm text-base-content/60">
-                                    <FolderKanban size={16} />
-
-                                    <span>
-                                        {member.projects.length}{' '}
-                                        {member.projects.length === 1
-                                            ? 'shared project'
-                                            : 'shared projects'}
-                                    </span>
-                                </div>
-
-                                {/* Task statistics */}
-                                <div className="grid grid-cols-3 gap-2 border-t border-base-200 pt-4">
-                                    <div>
-                                        <p className="text-xl font-bold text-primary">
-                                            {member.openTasks}
-                                        </p>
-                                        <p className="text-xs text-base-content/60">
-                                            Open tasks
-                                        </p>
-                                    </div>
-
-                                    <div className="border-l border-base-200 pl-3">
-                                        <p className="text-xl font-bold text-warning">
-                                            {member.inProgress}
-                                        </p>
-                                        <p className="text-xs text-base-content/60">
-                                            In progress
-                                        </p>
-                                    </div>
-
-                                    <div className="border-l border-base-200 pl-3">
-                                        <p className="text-xl font-bold text-success">
-                                            {member.completed}
-                                        </p>
-                                        <p className="text-xs text-base-content/60">
-                                            Completed
-                                        </p>
+                                        {card.key === "activeTasks" &&
+                                            !summaryLoading && (
+                                                <p className="mt-2 text-xs text-base-content/50">
+                                                    Tasks not yet completed
+                                                </p>
+                                            )}
                                     </div>
                                 </div>
-
-                                {/* Overdue task indicator */}
-                                {member.overdue > 0 && (
-                                    <div className="flex items-center gap-2 rounded-lg bg-error/5 px-3 py-2 text-sm text-error">
-                                        <AlertCircle size={16} />
-                                        {member.overdue} overdue{' '}
-                                        {member.overdue === 1 ? 'task' : 'tasks'}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div className="card border border-base-300/60 bg-base-100">
-                    <div className="card-body items-center py-16 text-center">
-                        <div className="rounded-full bg-base-200 p-4">
-                            <Users size={32} className="text-base-content/50" />
-                        </div>
-
-                        <h3 className="mt-2 text-lg font-bold">No team members found</h3>
-
-                        <p className="max-w-sm text-sm text-base-content/60">
-                            Try another search term or change your filters.
-                        </p>
-
-                        <button
-                            className="btn btn-primary mt-2"
-                            onClick={() => {
-                                setSearch('');
-                                setSelectedRole('All Roles');
-                                setSelectedProject('All Projects');
-                            }}
-                        >
-                            Clear filters
-                        </button>
+                            );
+                        })}
                     </div>
-                </div>
-            )}
+                </section>
+
+                {/* Member list heading */}
+                <section className="space-y-5">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <h2 className="text-xl font-bold">
+                                Your Team
+                            </h2>
+
+                            <p className="mt-1 text-sm text-base-content/60">
+                                {membersLoading
+                                    ? "Loading team members..."
+                                    : `${filteredMembers.length} ${filteredMembers.length === 1
+                                        ? "member"
+                                        : "members"
+                                    } found`}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Search and filters */}
+                    <div className="grid grid-cols-1 gap-3 rounded-2xl border border-base-300/70 bg-base-100 p-4 shadow-sm md:grid-cols-3">
+                        <label className="input input-bordered flex items-center gap-2">
+                            <Search
+                                size={18}
+                                className="shrink-0 text-base-content/40"
+                            />
+
+                            <input
+                                type="text"
+                                className="grow"
+                                placeholder="Search name or email..."
+                                value={searchText}
+                                onChange={(event) =>
+                                    setSearchText(event.target.value)
+                                }
+                            />
+                        </label>
+
+                        <label className="select select-bordered flex w-full items-center gap-2">
+                            <BriefcaseBusiness
+                                size={17}
+                                className="shrink-0 text-base-content/40"
+                            />
+
+                            <select
+                                className="grow"
+                                value={selectedRole}
+                                onChange={(event) =>
+                                    setSelectedRole(event.target.value)
+                                }
+                            >
+                                {roles.map((role) => (
+                                    <option key={role} value={role}>
+                                        {role}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <ChevronDown
+                                size={15}
+                                className="pointer-events-none text-base-content/40"
+                            />
+                        </label>
+
+                        <label className="select select-bordered flex w-full items-center gap-2">
+                            <FolderKanban
+                                size={17}
+                                className="shrink-0 text-base-content/40"
+                            />
+
+                            <select
+                                className="grow"
+                                value={selectedProject}
+                                onChange={(event) =>
+                                    setSelectedProject(event.target.value)
+                                }
+                            >
+                                {projects.map((project) => (
+                                    <option
+                                        key={project.id}
+                                        value={String(project.id)}
+                                    >
+                                        {project.name}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <ChevronDown
+                                size={15}
+                                className="pointer-events-none text-base-content/40"
+                            />
+                        </label>
+                    </div>
+
+                    {/* Loading state */}
+                    {membersLoading && (
+                        <div className="flex flex-col items-center justify-center rounded-2xl border border-base-300/70 bg-base-100 py-16">
+                            <span className="loading loading-spinner loading-lg text-primary" />
+
+                            <p className="mt-4 text-sm text-base-content/60">
+                                Loading your team...
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Error state */}
+                    {hasError && (
+                        <div className="rounded-2xl border border-error/20 bg-base-100 p-8 text-center">
+                            <CircleAlert
+                                size={36}
+                                className="mx-auto text-error"
+                            />
+
+                            <h3 className="mt-3 font-semibold">
+                                Couldn't load team data
+                            </h3>
+
+                            <p className="mt-2 text-sm text-base-content/60">
+                                Please check your connection and try again.
+                            </p>
+
+                            <button
+                                type="button"
+                                onClick={handleRefresh}
+                                className="btn btn-primary btn-sm mt-4 gap-2"
+                            >
+                                <RefreshCw size={15} />
+                                Try again
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Member cards */}
+                    {!membersLoading &&
+                        !membersError &&
+                        filteredMembers.length > 0 && (
+                            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
+                                {filteredMembers.map((member) => {
+                                    const memberName =
+                                        member.name || "Team Member";
+
+                                    const memberProjects =
+                                        member.projects || [];
+
+                                    const unfinishedTasks =
+                                        (member.openTasks || 0) +
+                                        (member.inProgress || 0);
+
+                                    return (
+                                        <article
+                                            key={String(member.id)}
+                                            className="card border border-base-300/70 bg-base-100 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+                                        >
+                                            <div className="card-body gap-5 p-5">
+                                                {/* Member profile */}
+                                                <div className="flex items-start gap-3">
+                                                    <div className="relative shrink-0">
+                                                        {member.avatar ? (
+                                                            <img
+                                                                src={member.avatar}
+                                                                alt={memberName}
+                                                                className="h-14 w-14 rounded-2xl object-cover"
+                                                                onError={(event) => {
+                                                                    event.currentTarget.style.display =
+                                                                        "none";
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <div
+                                                                className={`flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-bold ${getAvatarColor(memberName)}`}
+                                                            >
+                                                                {getInitials(
+                                                                    memberName
+                                                                ) || (
+                                                                        <UserRound
+                                                                            size={24}
+                                                                        />
+                                                                    )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="min-w-0 flex-1">
+                                                        <h3 className="truncate font-bold text-base-content">
+                                                            {memberName}
+                                                        </h3>
+
+                                                        <p className="mt-1 text-sm text-base-content/60">
+                                                            {member.role ||
+                                                                "Member"}
+                                                        </p>
+
+                                                        {member.email && (
+                                                            <p className="mt-2 flex min-w-0 items-center gap-1.5 text-xs text-base-content/50">
+                                                                <Mail
+                                                                    size={13}
+                                                                    className="shrink-0"
+                                                                />
+
+                                                                <span className="truncate">
+                                                                    {member.email}
+                                                                </span>
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    <span className="badge badge-ghost shrink-0">
+                                                        {memberProjects.length}{" "}
+                                                        {memberProjects.length ===
+                                                            1
+                                                            ? "project"
+                                                            : "projects"}
+                                                    </span>
+                                                </div>
+
+                                                <div className="divider my-0" />
+
+                                                {/* Assigned task statistics */}
+                                                <div>
+                                                    <div className="mb-3 flex items-center justify-between">
+                                                        <h4 className="text-sm font-semibold">
+                                                            Assigned Tasks
+                                                        </h4>
+
+                                                        <span className="text-xs text-base-content/50">
+                                                            {unfinishedTasks}{" "}
+                                                            unfinished
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="rounded-xl bg-base-200/70 p-3">
+                                                            <div className="flex items-center gap-2 text-xs text-base-content/60">
+                                                                <Clock3
+                                                                    size={14}
+                                                                />
+                                                                To Do
+                                                            </div>
+
+                                                            <p className="mt-2 text-xl font-bold">
+                                                                {member.openTasks ??
+                                                                    0}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="rounded-xl bg-info/10 p-3">
+                                                            <div className="flex items-center gap-2 text-xs text-info">
+                                                                <RefreshCw
+                                                                    size={14}
+                                                                />
+                                                                In Progress
+                                                            </div>
+
+                                                            <p className="mt-2 text-xl font-bold">
+                                                                {member.inProgress ??
+                                                                    0}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="rounded-xl bg-success/10 p-3">
+                                                            <div className="flex items-center gap-2 text-xs text-success">
+                                                                <CheckCircle2
+                                                                    size={14}
+                                                                />
+                                                                Completed
+                                                            </div>
+
+                                                            <p className="mt-2 text-xl font-bold">
+                                                                {member.completed ??
+                                                                    0}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="rounded-xl bg-error/10 p-3">
+                                                            <div className="flex items-center gap-2 text-xs text-error">
+                                                                <CircleAlert
+                                                                    size={14}
+                                                                />
+                                                                Overdue
+                                                            </div>
+
+                                                            <p className="mt-2 text-xl font-bold">
+                                                                {member.overdue ??
+                                                                    0}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Shared projects */}
+                                                <div>
+                                                    <h4 className="mb-3 text-sm font-semibold">
+                                                        Shared Projects
+                                                    </h4>
+
+                                                    {memberProjects.length >
+                                                        0 ? (
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {memberProjects
+                                                                .slice(0, 3)
+                                                                .map(
+                                                                    (project) => (
+                                                                        <span
+                                                                            key={String(
+                                                                                project.id
+                                                                            )}
+                                                                            className="badge badge-outline h-auto max-w-full whitespace-normal py-2"
+                                                                        >
+                                                                            <FolderKanban
+                                                                                size={
+                                                                                    12
+                                                                                }
+                                                                                className="mr-1 shrink-0"
+                                                                            />
+
+                                                                            <span className="break-all">
+                                                                                {
+                                                                                    project.name
+                                                                                }
+                                                                            </span>
+                                                                        </span>
+                                                                    )
+                                                                )}
+
+                                                            {memberProjects.length >
+                                                                3 && (
+                                                                    <span className="badge badge-ghost py-2">
+                                                                        +
+                                                                        {memberProjects.length -
+                                                                            3}{" "}
+                                                                        more
+                                                                    </span>
+                                                                )}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-xs text-base-content/50">
+                                                            No shared projects
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </article>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                    {/* Empty state */}
+                    {!membersLoading &&
+                        !membersError &&
+                        filteredMembers.length === 0 && (
+                            <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 px-4 py-16 text-center">
+                                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-base-200 text-base-content/50">
+                                    <Users size={26} />
+                                </div>
+
+                                <h3 className="mt-4 text-lg font-semibold">
+                                    No team members found
+                                </h3>
+
+                                <p className="mx-auto mt-2 max-w-md text-sm text-base-content/60">
+                                    {teamMembers.length === 0
+                                        ? "No other members share your projects yet."
+                                        : "Try changing your search or filters to find team members."}
+                                </p>
+
+                                {(searchText ||
+                                    selectedRole !== "All Roles" ||
+                                    selectedProject !== "All Projects") && (
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline btn-sm mt-4"
+                                            onClick={() => {
+                                                setSearchText("");
+                                                setSelectedRole("All Roles");
+                                                setSelectedProject(
+                                                    "All Projects"
+                                                );
+                                            }}
+                                        >
+                                            Clear filters
+                                        </button>
+                                    )}
+                            </div>
+                        )}
+                </section>
+            </div>
         </div>
     );
 };
