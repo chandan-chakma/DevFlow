@@ -10,16 +10,16 @@ import { useQuery } from '@tanstack/react-query';
 const State = () => {
     const axiosSecure = UseAxiosSecures();
 
-    const { data: overview = [] } = useQuery({
+    const { data: overview } = useQuery({
         queryKey: ['dashboard-summary'],
         queryFn: async () => {
             const res = await axiosSecure.get('/dashboard/summary');
-            console.log(res);
+            // console.log(res);
             return res.data;
         }
     });
-    const { completedTasks, totalMembers, totalProjects, totalTasks, newProjectsThisWeek, completedToday, newMembersThisWeek,completedTasksChange} = overview.stats;
-    console.log(overview.stats)
+    const { completedTasks, totalMembers, totalProjects, totalTasks, newProjectsThisWeek, completedToday, newMembersThisWeek, completedTasksChange } = overview?.stats ?? {};;
+    // console.log(overview.stats)
     return (
         <div className='mt-4'>
             <section className='grid grid-cols-4 gap-2'>
@@ -36,7 +36,7 @@ const State = () => {
                             <p className='text-muted my-2'>Total Projects</p>
                             <div className='flex items-center gap-1 text-success'>
                                 <IoArrowUp />
-                                <p className='text-xs'> {newProjectsThisWeek??0} new this week</p>
+                                <p className='text-xs'> {newProjectsThisWeek ?? 0} new this week</p>
                             </div>
 
                         </div>
@@ -97,16 +97,17 @@ const State = () => {
                             <p className='text-muted my-2'>Completed Tasks</p>
                             <div className='flex items-center gap-1 text-warning'>
                                 <IoArrowUp />
-                                <p className='text-xs'>{ completedTasksChange > 0 ? "+" : ""}
+                                <p className='text-xs'>{completedTasksChange > 0 ? "+" : ""}
                                     {completedTasksChange ?? 0}% from last week</p>
                             </div>
 
                         </div>
                     </div>
                 </div>
-                                
-            
+
+
             </section>
+           
         </div>
     );
 };

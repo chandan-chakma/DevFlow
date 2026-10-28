@@ -11,6 +11,12 @@ import MyTasks from '../../../Components/DashboardComponent/HomeDashboard/MyTask
 import Calendar from '../../../Components/DashboardComponent/HomeDashboard/Calendar.jsx';
 
 const DashBoardHome = () => {
+    const today = new Date().toLocaleDateString("en-US", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    });
     return (
         <div className='grid grid-cols-12 gap-5'>
             <div className='col-span-9'>
@@ -24,7 +30,8 @@ const DashBoardHome = () => {
                     <div className='flex gap-3'>
                         <div className='flex items-center gap-1'>
                             <LuCalendarDays />
-                            <p>Tue, Apr 21,2026</p>
+                            {/* <p>Tue, Apr 21,2026</p> */}
+                            <p>{today}</p>
                         </div>
                         <div className="badge bg-[rgb(202,201,206)] text-primary">
                             keep going!

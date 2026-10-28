@@ -1,25 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts';
+import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
+import { useQuery } from '@tanstack/react-query';
 const OverviewChart = () => {
-    const data = [
-        { day: "Tue", completed: 6, created: 3 },
-        { day: "Wed", completed: 8, created: 5 },
-        { day: "Thu", completed: 12, created: 9 },
-        { day: "Fri", completed: 9, created: 7 },
-        { day: "Sat", completed: 14, created: 10 },
-        { day: "Sun", completed: 18, created: 13 },
-        { day: "Mon", completed: 13, created: 9 },
-    ];
+    const axiosSecure = UseAxiosSecures();
+    const [range, setRange] = useState('this-week');
+
+    const { data: chartData = [] } = useQuery({
+        queryKey: ['dashboard-overview-chart',range],
+        queryFn: async () => {
+            const res = await axiosSecure.get(`/dashboard/overview-chart?range=${range}`)
+            console.log(res);
+            return res.data.chartData;
+        }
+    })
+    // Map API data into the format Recharts expects
+    const data = chartData.map((item) => ({
+        day: item.day,
+        completed: item.completed,
+        created: item.created
+    }));
+    // const data = [
+    //     { day: "Tue", completed: 6, created: 3 },
+    //     { day: "Wed", completed: 8, created: 5 },
+    //     { day: "Thu", completed: 12, created: 9 },
+    //     { day: "Fri", completed: 9, created: 7 },
+    //     { day: "Sat", completed: 14, created: 10 },
+    //     { day: "Sun", completed: 18, created: 13 },
+    //     { day: "Mon", completed: 13, created: 9 },
+    // ];
     return (
         <div className='w-full rounded-xl border border-base-300 bg-white p-5 shadow-sm'>
             <div className='flex justify-between items-center'>
                 <h2>Project Overview</h2>
                 {/* Date filter */}
-                <select defaultValue="Pick a color" className="select w-30">
-                    <option disabled={true}>Pick a color</option>
-                    <option>Crimson</option>
-                    <option>Amber</option>
-                    <option>Velvet</option>
+                <select defaultValue="this-week" value={range}
+                    onChange={(e) => setRange(e.target.value)} className="select w-30">
+                    <option value="this-week">This week</option>
+                    <option value="last-week">Last week</option>
+                    <option value="last-30-days">Last 30 days</option>
                 </select>
             </div>
 
