@@ -1,39 +1,32 @@
+import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import { Cell, Pie, PieChart, Tooltip, ResponsiveContainer, } from 'recharts';
+import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 
 const TasksPieChart = () => {
-    const taskData = [
-        {
-            name: "To Do",
-            value: 4,
-            color: "#D9E0F0",
-        },
-        {
-            name: "In Progress",
-            value: 5,
-            color: "#4F7DF3",
-        },
-        {
-            name: "In Review",
-            value: 4,
-            color: "#F5B63F",
-        },
-        {
-            name: "Done",
-            value: 28,
-            color: "#45B89C",
-        },
-    ];
+    const axiosSecure = UseAxiosSecures();
 
-    const totalTasks = taskData.reduce((sum, item) => sum + item.value, 0);
+    const { data:taskChart=[] } = useQuery({
+        queryKey: ['taskStatusChart'],
+        queryFn: async () => {
+            const res = await axiosSecure.get('/dashboard/task-status-chart')
+            // console.log(res.data);
+            return res.data.taskData;
+        }
+    })
 
-    const completed = taskData.find(
-        (item) => item.name === "Done"
+    const totalTasks = taskChart.reduce(
+        (sum, item) => sum + item.value,
+        0
+    );
+
+    const completed = taskChart.find(
+        (item) => item.name === 'Done'
     )?.value || 0;
 
-    const completedPercentage = Math.round(
-        (completed / totalTasks) * 100
-    );
+    const completedPercentage = totalTasks
+        ? Math.round((completed / totalTasks) * 100)
+        : 0;
     return (
         <div className='w-full rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm'>
             <h2 className='text-lg font-bold text-base-content'>Task Progress</h2>
@@ -43,7 +36,7 @@ const TasksPieChart = () => {
                     <PieChart>
 
                         <Pie
-                            data={taskData}
+                            data={taskChart}
                             dataKey="value"
                             nameKey="name"
                             cx="50%"
@@ -53,7 +46,7 @@ const TasksPieChart = () => {
                             paddingAngle={2}
                             stroke="none"
                         >
-                            {taskData.map((item, index) => (
+                            {taskChart.map((item, index) => (
                                 <Cell
                                     key={`cell-${index}`}
                                     fill={item.color}
@@ -81,7 +74,7 @@ const TasksPieChart = () => {
             {/* Legend */}
             <div className="mt-2 space-y-3">
 
-                {taskData.map((item) => (
+                {taskChart.map((item) => (
                     <div
                         key={item.name}
                         className="flex items-center justify-between"
