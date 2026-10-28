@@ -11,7 +11,7 @@ const TasksPieChart = () => {
         queryFn: async () => {
             const res = await axiosSecure.get('/dashboard/task-status-chart')
             // console.log(res.data);
-            return res.data.taskData;
+            return res.data?.taskData;
         }
     })
 

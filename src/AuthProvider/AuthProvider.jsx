@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndP
 import { auth } from '../Firebase/Firebase.comfig.js';
 import Loading from '../Components/Loading/Loading.jsx';
 import UseAxiosSecures from '../Hooks/UseAxiosSecures.jsx';
+import { useQueryClient } from '@tanstack/react-query';
 
 const AuthProvider = ({ children }) => {
     const axiosSecure = UseAxiosSecures();
@@ -36,9 +37,21 @@ const AuthProvider = ({ children }) => {
     }
 
     // logOut
-    const logOut = () => {
-        return signOut(auth);
+    const queryClient = useQueryClient();
+
+    const logOut = async () => {
+        setAuthActionLoading(true);
+        try {
+            await signOut(auth);
+            queryClient.clear();       // ✅ THE fix
+        } finally {
+            setAuthActionLoading(false);
+        }
     }
+    // const logOut = () => {
+    //     setAuthActionLoading(true)
+    //     return signOut(auth);  
+    // }
 
     useEffect(() => {
         const unSubcribe=onAuthStateChanged(auth, async(currentUser) => {
