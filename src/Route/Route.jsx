@@ -14,6 +14,7 @@ import ProjectDetails from "../pages/DashBoard/Projects/ProjectDetails.jsx";
 import PrivateRoute from "./PrivateRoute.jsx";
 import Activity from "../pages/DashBoard/Activity/Activity.jsx";
 import Calendar from "../pages/DashBoard/Calendar/Calendar.jsx";
+import UserManagement from "../pages/DashBoard/UserManagement/UserManagement.jsx";
 
 export const router = createBrowserRouter([
     {
@@ -76,6 +77,10 @@ export const router = createBrowserRouter([
             {
                 path: '/dashboard/calendar',
                 Component:Calendar
+            },
+            {
+                path: '/dashboard/usermanagement',
+                Component:UserManagement
             },
             {
                 path: '/dashboard/settings',

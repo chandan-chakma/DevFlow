@@ -313,6 +313,14 @@ const DashBoardLayout = () => {
                                     <span className="is-drawer-close:hidden">Calendar</span>
                                 </Link>
                             </li>
+
+                            <li>
+                                <Link to='/dashboard/usermanagement' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="User Management">
+                                    <GrAnalytics size={18}
+                                    strokeWidth={1}/>
+                                    <span className="is-drawer-close:hidden">User Management</span>
+                                </Link>
+                            </li>
                             <li>
                                 <Link to='/dashboard/settings' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Settings">
                                     <AiOutlineSetting size={19}

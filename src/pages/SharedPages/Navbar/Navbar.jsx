@@ -20,7 +20,12 @@ const Navbar = () => {
         <a href="#pricing">Pricing</a>
         <a href="#about">About</a>
         <a href="#contact">Contact</a>
-        <NavLink to='/dashboard'>Dashboard</NavLink>
+        {
+            user && <>
+                <NavLink to='/dashboard'>Dashboard</NavLink>
+            </>
+        }
+        
         {/* <NavLink to='/features'>Features</NavLink>
         <NavLink to='/pricing'>Pricing</NavLink>
         <NavLink to='/about'>About</NavLink>
