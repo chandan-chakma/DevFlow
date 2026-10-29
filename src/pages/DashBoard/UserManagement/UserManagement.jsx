@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
+import { MdDeleteForever } from 'react-icons/md';
 
 const UserManagement = () => {
     const axiosSecure = UseAxiosSecures();
+    const queryClient = useQueryClient();
     const [search, setSearch] = useState('');
 
     // get all user data tanstack query 
-    const { data: users = [],refetch } = useQuery({
+    const { data: users = []} = useQuery({
         queryKey: ['users'],
         queryFn: async () => {
             const res = await axiosSecure.get('/users')
@@ -17,67 +19,161 @@ const UserManagement = () => {
         }
     })
 
-    const handleMakeUser = (user) => {
-        console.log(user)
-        const roleInfo = { role: 'user' }
-        axiosSecure.patch(`/users/${user._id}/role`, roleInfo)
-            .then(res => {
-                if (res.data.modifiedCount) {
-                    console.log(res.data)
-                    Swal.fire({
-                        title: "Are you sure?",
-                        text: "You won't be able to revert this!",
-                        icon: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#3085d6",
-                        cancelButtonColor: "#d33",
-                        confirmButtonText: "Yes, Change to "
-                    }).then((result) => {
-                        if (result.isConfirmed)
-                            refetch()
-                        Swal.fire({
-                            title: "Deleted!",
-                            text: "Your are user now.",
-                            icon: "success"
-                        });
-                    });
 
-                }
-            })
-    }
-    const handleMakeAdmin = (user) => {
-        console.log(user)
-        const roleInfo = { role: 'admin' }
-        axiosSecure.patch(`users/${user._id}/role`, roleInfo)
-            .then(res => {
-                console.log(res.data)
-                if (res.data.modifiedCount) {
-                    refetch()
-                    if (res.data.modifiedCount) {
-                        console.log(res.data)
-                        Swal.fire({
-                            title: "Are you sure?",
-                            text: "You won't be able to revert this!",
-                            icon: "warning",
-                            showCancelButton: true,
-                            confirmButtonColor: "#3085d6",
-                            cancelButtonColor: "#d33",
-                            confirmButtonText: "Yes, Change to "
-                        }).then((result) => {
-                            if (result.isConfirmed)
-                                refetch()
-                            Swal.fire({
-                                title: "Deleted!",
-                                text: "Your are user now.",
-                                icon: "success"
-                            });
-                        });
+    // make admin user 
+   
 
-                    }
-                }
-            })
+    const roleMutation = useMutation({
+        mutationFn: async ({ userId, role }) => {
+            const res = await axiosSecure.patch(
+                `/users/${userId}/role`,
+                { role }
+            );
+            return res.data;
+        },
 
-    }
+        onSuccess: (data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+
+            Swal.fire({
+                title: 'Success!',
+                text: `User role changed to ${variables.role}.`,
+                icon: 'success'
+            });
+        },
+
+        onError: (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: error.response?.data?.message || 'Failed to update user role.',
+                icon: 'error'
+            });
+        }
+    });
+    const handleChangeRole = async (user, role) => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `Change ${user.displayName}'s role to ${role}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, change role',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            roleMutation.mutate({
+                userId: user._id,
+                role
+            });
+        }
+    };
+
+    // const handleMakeUser = (user) => {
+    //     console.log(user)
+    //     const roleInfo = { role: 'user' }
+    //     axiosSecure.patch(`/users/${user._id}/role`, roleInfo)
+    //         .then(res => {
+    //             if (res.data.modifiedCount) {
+    //                 console.log(res.data)
+    //                 Swal.fire({
+    //                     title: "Are you sure?",
+    //                     text: "You won't be able to revert this!",
+    //                     icon: "warning",
+    //                     showCancelButton: true,
+    //                     confirmButtonColor: "#3085d6",
+    //                     cancelButtonColor: "#d33",
+    //                     confirmButtonText: "Yes, Change to "
+    //                 }).then((result) => {
+    //                     if (result.isConfirmed)
+    //                         refetch()
+    //                     Swal.fire({
+    //                         title: "Deleted!",
+    //                         text: "Your are user now.",
+    //                         icon: "success"
+    //                     });
+    //                 });
+
+    //             }
+    //         })
+    // }
+    // const handleMakeAdmin = (user) => {
+    //     console.log(user)
+    //     const roleInfo = { role: 'admin' }
+    //     axiosSecure.patch(`users/${user._id}/role`, roleInfo)
+    //         .then(res => {
+    //             console.log(res.data)
+    //             if (res.data.modifiedCount) {
+    //                 refetch()
+    //                 if (res.data.modifiedCount) {
+    //                     console.log(res.data)
+    //                     Swal.fire({
+    //                         title: "Are you sure?",
+    //                         text: "You won't be able to revert this!",
+    //                         icon: "warning",
+    //                         showCancelButton: true,
+    //                         confirmButtonColor: "#3085d6",
+    //                         cancelButtonColor: "#d33",
+    //                         confirmButtonText: "Yes, Change to "
+    //                     }).then((result) => {
+    //                         if (result.isConfirmed)
+    //                             refetch()
+    //                         Swal.fire({
+    //                             title: "Deleted!",
+    //                             text: "Your are user now.",
+    //                             icon: "success"
+    //                         });
+    //                     });
+
+    //                 }
+    //             }
+    //         })
+
+    // }
+
+    // delete user 
+ 
+
+    const deleteUserMutation = useMutation({
+        mutationFn: async (userId) => {
+            const res = await axiosSecure.delete(`/users/${userId}`);
+            return res.data;
+        },
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+
+            Swal.fire({
+                title: 'Deleted!',
+                text: 'User deleted successfully.',
+                icon: 'success'
+            });
+        },
+
+        onError: (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: error.response?.data?.message || 'Failed to delete user.',
+                icon: 'error'
+            });
+        }
+    });
+
+    const handleDeleteUser = async (user) => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `Delete ${user.displayName}'s account?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete user'
+        });
+
+        if (result.isConfirmed) {
+            deleteUserMutation.mutate(user._id);
+        }
+    };
 
        
     return (
@@ -114,6 +210,7 @@ const UserManagement = () => {
                             <th>Email</th>
                             <th>Role</th>
                             <th></th>
+                            {/* <th></th> */}
                         </tr>
                     </thead>
                     <tbody>
@@ -145,16 +242,18 @@ const UserManagement = () => {
                                         {user.email}
                                     </td>
                                     <td>{user.role}</td>
-                                    <th>
+                                    <th className='flex items-center gap-2'>
                                         {user.role === 'admin' ?
-                                            <button onClick={() => handleMakeUser(user)} className="btn btn-secondary btn-xs mr-2">Make user</button>
+                                            <button onClick={() => handleChangeRole(user,'user')} className="btn btn-secondary btn-xs mr-2">Make user</button>
                                             :
-                                            <button onClick={() => handleMakeAdmin(user)} className="btn btn-primary btn-xs">Make Admin</button>
+                                            <button onClick={() => handleChangeRole(user, 'admin')} className="btn btn-primary btn-xs">Make Admin</button>
 
                                         }
-                                        
+                                        <button onClick={()=>handleDeleteUser(user)}><MdDeleteForever size={30} className='text-error ' /></button>
                                         
                                     </th>
+                                    {/* <th></th> */}
+                                   
                                 </tr>
                             )
                         }
