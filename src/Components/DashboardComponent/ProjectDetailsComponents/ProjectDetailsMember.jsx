@@ -63,6 +63,61 @@ const ProjectDetailsMember = ({ project }) => {
         enabled: !!projectId
 
     })
+
+
+    // update the project member role 
+    const updateRoleMutation = useMutation({
+        mutationFn: async (userId) => {
+            const res = await axiosSecure.patch(
+                `/project-members/${projectId}/${userId}/role`,
+                { role: 'manager' }
+            );
+
+            return res.data;
+        },
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['projectMembers', projectId]
+            });
+
+            Swal.fire({
+                title: 'Success!',
+                text: 'Member promoted to manager.',
+                icon: 'success'
+            });
+        },
+
+        onError: (error) => {
+            Swal.fire({
+                title: 'Error',
+                text: error.response?.data?.message || 'Failed to update member role.',
+                icon: 'error'
+            });
+        }
+    });
+
+    const handleMakeManager = (member) => {
+        Swal.fire({
+            title: 'Make this member a manager?',
+            text: `${member.name} will become the project manager.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, promote',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                updateRoleMutation.mutate(member._id);
+            }
+        });
+    };
+
+    // check mangaer role only one manager in a project 
+    const currentManager = members.find(
+        member => member.role === 'manager'
+    );
+
+    const hasManager = !!currentManager;
     
     return (
         <div>
@@ -198,6 +253,7 @@ const ProjectDetailsMember = ({ project }) => {
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Position</th>
+                                    <th>Role</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -230,8 +286,22 @@ const ProjectDetailsMember = ({ project }) => {
                                                 {member.email}
                                             </td>
                                             <td>Purple</td>
+                                            <td>{member.role}</td>
                                             <th>
-                                                <button className="btn btn-ghost btn-xs">details</button>
+                                                <button
+                                                    disabled={
+                                                        hasManager ||
+                                                        member.role === 'manager' ||
+                                                        updateRoleMutation.isPending
+                                                    }
+                                                    onClick={() => handleMakeManager(member)} className="btn btn-secondary btn-xs"> {member.role === 'manager'
+                                                        ? 'Manager'
+                                                        : hasManager
+                                                            ? 'Manager Assigned'
+                                                            : updateRoleMutation.isPending
+                                                                ? 'Updating...'
+                                                                : 'Make Manager'}
+                                                </button>
                                             </th>
                                         </tr>
                                     )

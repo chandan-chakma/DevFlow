@@ -14,8 +14,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from "date-fns";
 import { IoIosNotifications } from 'react-icons/io';
 import socket from '../../Socket/socket.js';
+import useUserRole from '../../Hooks/UseUserRole.jsx';
 const DashBoardLayout = () => {
     const { user } = UseAuth();
+    const { role } = useUserRole();
     const axiosSecure = UseAxiosSecures();
     const navigate = useNavigate();
     // socket io 
@@ -314,13 +316,19 @@ const DashBoardLayout = () => {
                                 </Link>
                             </li>
 
-                            <li>
-                                <Link to='/dashboard/usermanagement' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="User Management">
-                                    <GrAnalytics size={18}
-                                    strokeWidth={1}/>
-                                    <span className="is-drawer-close:hidden">User Management</span>
-                                </Link>
-                            </li>
+                            {
+                                role === 'admin' && <>
+                                    <li>
+                                        <Link to='/dashboard/usermanagement' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="User Management">
+                                            <GrAnalytics size={18}
+                                                strokeWidth={1} />
+                                            <span className="is-drawer-close:hidden">User Management</span>
+                                        </Link>
+                                    </li>
+                                </>
+                            }
+
+                           
                             <li>
                                 <Link to='/dashboard/settings' className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Settings">
                                     <AiOutlineSetting size={19}

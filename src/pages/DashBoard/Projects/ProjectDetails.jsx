@@ -11,6 +11,7 @@ import ProjectDetailsTask from '../../../Components/DashboardComponent/ProjectDe
 import ProjectDetailsActivity from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsActivity.jsx';
 import ProjectDetailsMember from '../../../Components/DashboardComponent/ProjectDetailsComponents/ProjectDetailsMember.jsx';
 import socket from '../../../Socket/socket.js';
+import useProjectRole from '../../../Hooks/useProjectRole.jsx';
 
 const ProjectDetails = () => {
     const { id } = useParams();
@@ -83,8 +84,10 @@ const ProjectDetails = () => {
             return res.data;
         }
     })
+
+    const { permissions, isLoading: roleLoading } = useProjectRole(id);
     // const {createdAt,dueDate } = project;
-    if (isLoading) {
+    if (isLoading || roleLoading) {
         return <Loading></Loading>
 
     }
@@ -107,6 +110,7 @@ const ProjectDetails = () => {
         return formattedDate;
         
     }
+
    
   
     return (
@@ -314,7 +318,9 @@ const ProjectDetails = () => {
                 }
                 {
                     activeTab === 'task' && (
-                        <ProjectDetailsTask project={project}></ProjectDetailsTask>
+                        <ProjectDetailsTask project={project}
+                            permissions={permissions}
+                        ></ProjectDetailsTask>
                     )
                 }
                 {

@@ -13,8 +13,11 @@ import { DndContext } from "@dnd-kit/core";
 import TaskCard from './TaskCard.jsx';
 import DroppableColumn from './dropeableColumn.jsx';
 import socket from '../../../Socket/socket.js';
-const ProjectDetailsTask = ({ project }) => {
+import UseAuth from '../../../Hooks/UseAuth.jsx';
+const ProjectDetailsTask = ({ project, permissions }) => {
     const { _id: projectId } = project;
+    console.log(permissions)
+    const { user } = UseAuth();
     // console.log(project)
     // search Task 
     const [search, setSearch] = useState('')
@@ -325,13 +328,24 @@ const ProjectDetailsTask = ({ project }) => {
     //    status update 
     // drag and drop wise 
     const handleStatusUpdate = (taskId, newStatus) => {
+        const task = projectTasks.find(
+            task => task._id === taskId
+        );
+
+        if (!task || task.assignee?.email !== user?.email) {
+            Swal.fire({
+                title: 'Permission denied',
+                text: 'Only the assigned person can update this task status.',
+                icon: 'warning'
+            });
+            return;
+        }
+
         updateTaskMutation.mutate({
             id: taskId,
-            taskData: {
-                status: newStatus
-            }
-        })
-    }
+            taskData: { status: newStatus }
+        });
+    };
     const handleDragEnd = (event) => {
         const { active, over } = event;
 
@@ -341,10 +355,22 @@ const ProjectDetailsTask = ({ project }) => {
         const newStatus = over.id;
 
         const task = projectTasks.find(
-            (task) => task._id === taskId
+            task => task._id === taskId
         );
 
         if (!task || task.status === newStatus) return;
+
+        // Check whether the logged-in user is assigned to this task
+        const assignedEmail = task.assignee?.email;
+
+        if (!assignedEmail || assignedEmail !== user?.email) {
+            Swal.fire({
+                title: 'Permission denied',
+                text: 'Only the assigned person can update this task status.',
+                icon: 'warning'
+            });
+            return;
+        }
 
         handleStatusUpdate(taskId, newStatus);
     };
@@ -656,13 +682,18 @@ const ProjectDetailsTask = ({ project }) => {
                                                     )} */}
 
                                                         </div>
+                                                        {
+                                                            permissions.canDeleteTask && (
+                                                                <MdDelete onClick={() => handleDeleteTask(task._id)}
+                                                                    size={18}
+                                                                    className="text-error"
+                                                                />  
+                                                            )
+                                                        }
 
 
-                                                        <MdDelete onClick={() => handleDeleteTask(task._id)}
-                                                            size={18}
-                                                            className="text-error"
-                                                        />
-                                                        <button onClick={() => handleStatusUpdate(task._id, "In Progress")}>move </button>
+                                                        
+                                                        {/* <button onClick={() => handleStatusUpdate(task._id, "In Progress")}>move </button> */}
 
                                                     </div>
 
@@ -982,24 +1013,36 @@ const ProjectDetailsTask = ({ project }) => {
                             <div className="mb-5 flex items-center justify-between">
 
                                 {/* Edit Task */}
-                                <button
-                                    disabled={!selectedTask}
-                                    onClick={() => handleEditTaskModal(selectedTask)}
+                                {permissions.canEditTask && (
+                                    <button
+                                        disabled={!selectedTask}
+                                        onClick={() => handleEditTaskModal(selectedTask)}
+
+                                        className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-content shadow-sm transition hover:bg-accent-content disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary">
+                                        <FaRegEdit size={17} />
+                                        Edit Task
+                                    </button>
+                                )}
                                 
-                                    className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-content shadow-sm transition hover:bg-accent-content disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary">
-                                    <FaRegEdit size={17} />
-                                    Edit Task
-                                </button>
                                  
                                 {/* Add task button  */}
+                                {permissions.canCreateTask && (
+                                    <button
+                                        onClick={handleAddTaskModal}
+                                        className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-content shadow-sm transition hover:bg-accent-content"
+                                    >
+                                        <LuPlus size={17} />
+                                        Add Task
+                                    </button>
+                                )}
 
-                                <button onClick={handleAddTaskModal} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-content shadow-sm transition hover:bg-accent-content">
+                                {/* <button onClick={handleAddTaskModal} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-content shadow-sm transition hover:bg-accent-content">
 
                                     <LuPlus size={17} />
 
                                     Add Task
 
-                                </button>
+                                </button> */}
 
                                 {/* add task Modal  */}
                                 {/* Open the modal using document.getElementById('ID').showModal() method */}
