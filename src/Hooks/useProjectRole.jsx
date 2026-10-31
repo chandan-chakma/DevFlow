@@ -37,6 +37,7 @@ const useProjectRole = (projectId) => {
         canEditTask: isAdmin || isManager,
         canDeleteTask: isAdmin || isManager,
         canAssignTask: isAdmin || isManager,
+        canAddMember:isAdmin || isManager,
     };
 
     return {

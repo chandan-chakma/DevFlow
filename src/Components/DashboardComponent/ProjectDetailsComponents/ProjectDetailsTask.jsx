@@ -16,7 +16,7 @@ import socket from '../../../Socket/socket.js';
 import UseAuth from '../../../Hooks/UseAuth.jsx';
 const ProjectDetailsTask = ({ project, permissions }) => {
     const { _id: projectId } = project;
-    console.log(permissions)
+    // console.log(permissions)
     const { user } = UseAuth();
     // console.log(project)
     // search Task 
@@ -27,6 +27,7 @@ const ProjectDetailsTask = ({ project, permissions }) => {
     const [sort, setSort] = useState('due-latest');
     // selected task show write panel 
     const [selectedTask, setSelectedTask] = useState(null);
+    console.log(selectedTask)
     
     const { _id:id } = project
     // console.log(_id)
@@ -1770,7 +1771,7 @@ const ProjectDetailsTask = ({ project, permissions }) => {
                                         <div>
 
                                             <p className="text-sm font-semibold text-slate-700">
-                                                {selectedTask?.assignee?.name}
+                                                {selectedTask?.assignee?.displayName}
                                             </p>
 
                                             <p className="text-xs text-muted">

@@ -4,7 +4,9 @@ import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 
-const ProjectDetailsMember = ({ project }) => {
+
+const ProjectDetailsMember = ({ project, permissions }) => {
+    // const { permissions } = useProjectRole();
     const { _id: projectId } = project; 
     const axiosSecure = UseAxiosSecures();
     const addMemberOpenModal = useRef();
@@ -145,17 +147,24 @@ const ProjectDetailsMember = ({ project }) => {
                             // value={searchText}
                             // onChange={(event) => setSearchText(event.target.value)}
                         />
-                    </label>
+                        </label>
+                        
+                        {
+                            permissions.canAddMember && (
+                                <button
+                                    type="button"
+                                    className="btn border-0 bg-primary text-primary-content hover:bg-primary/90"
+                                    onClick={handleAddMemberModal}
 
-                    <button
-                        type="button"
-                            className="btn border-0 bg-primary text-primary-content hover:bg-primary/90"
-                            onClick={handleAddMemberModal}
-                       
-                    >
-                        <LuPlus size={18} />
-                        Add Member
-                    </button>
+                                >
+                                    <LuPlus size={18} />
+                                    Add Member
+                                </button>
+                                
+                            )
+                        }
+
+                   
                 </div>
                 </div>
                 

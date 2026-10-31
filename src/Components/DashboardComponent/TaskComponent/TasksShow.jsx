@@ -27,10 +27,11 @@ const TasksShow = () => {
         queryKey:['tasks',search,status,priority,sort],
         queryFn: async () => {
             const res = await axiosSecure.get(`/tasks?searchText=${search}&status=${status}&priority=${priority}&sort=${sort}`)
-            // console.log(res)
+            console.log(res)
             return res.data
         }
     })
+
 
     // update task 
     const openaEditTaskModalRef = useRef();
@@ -438,6 +439,7 @@ const TasksShow = () => {
                                         </td>
                                         <td>{formatDate(task.dueDate)}</td>
                                         <td>
+                                            {task.assignee?.displayName}
                                             
                                         </td>
                                         <th>

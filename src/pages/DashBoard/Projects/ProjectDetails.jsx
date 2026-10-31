@@ -325,7 +325,9 @@ const ProjectDetails = () => {
                 }
                 {
                     activeTab === 'members' && (
-                        <ProjectDetailsMember project={project}></ProjectDetailsMember>
+                        <ProjectDetailsMember project={project}
+                            permissions={permissions}
+                        ></ProjectDetailsMember>
                     )
                 }
                 {

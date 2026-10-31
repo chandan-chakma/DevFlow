@@ -7,10 +7,12 @@ import UseAxiosSecures from '../../../Hooks/UseAxiosSecures.jsx';
 import Swal from 'sweetalert2';
 import { RiProjector2Line } from 'react-icons/ri';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import useUserRole from '../../../Hooks/useUserRole.jsx';
 
 
 const OverViewProject = () => {
     const openProjectModalRef = useRef();
+    const {role} = useUserRole()
     const handleOpenProjectModal = () => {
         // console.log("open modal")
         openProjectModalRef.current.showModal();
@@ -82,11 +84,17 @@ const OverViewProject = () => {
                         <p className='text-muted text-sm'>Manage and collaborate on your projects.</p>
                     </div>
                 </div>
+                {
+                    role === 'admin' && (
+                        <div>
+                            <button onClick={handleOpenProjectModal} className='btn btn-primary'><FaPlus />New Project
+                            </button>
+                        </div>
+                        
+                    )
+                }
 
-                <div>
-                    <button onClick={handleOpenProjectModal} className='btn btn-primary'><FaPlus />New Project
-                    </button>
-                </div>
+                
                 
             </div>
 
