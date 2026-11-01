@@ -438,6 +438,78 @@ const ProjectDetailsTask = ({ project, permissions }) => {
         }
 
     });
+
+
+    // ai generate task 
+
+    const [aiDescription, setAiDescription] = useState('');
+    const [generatedTasks, setGeneratedTasks] = useState([]);
+    const [selectedAITasks, setSelectedAITasks] = useState([]);
+    console.log(aiDescription);
+    console.log(generatedTasks)
+    const openAITaskModalRef = useRef();
+
+    const handleOpenAITaskModal = () => {
+        openAITaskModalRef.current.showModal();
+    };
+    const generateTasksMutation = useMutation({
+        mutationFn: async (description) => {
+            const res = await axiosSecure.post(
+                `/projects/${projectId}/ai/generate-tasks`,
+                { description }
+            );
+
+            return res.data;
+        },
+
+        onSuccess: (data) => {
+            setGeneratedTasks(data.tasks || []);
+
+            Swal.fire({
+                title: 'Tasks generated!',
+                text: 'Review the AI-generated tasks before saving.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        },
+
+        onError: (error) => {
+            console.error('AI generation error:', error);
+
+            Swal.fire({
+                title: 'Generation failed',
+                text: error.response?.data?.message || 'Could not generate tasks. Please try again.',
+                icon: 'error'
+            });
+        }
+    });
+
+
+    const handleGenerateTasks = () => {
+        if (!aiDescription.trim()) {
+            Swal.fire({
+                title: 'Description required',
+                text: 'Please describe your project first.',
+                icon: 'warning'
+            });
+            return;
+        }
+
+        generateTasksMutation.mutate(aiDescription);
+    };
+
+    const handleSelectAITask = (index) => {
+        setSelectedAITasks(prev =>
+            prev.includes(index)
+                ? prev.filter(item => item !== index)
+                : [...prev, index]
+        );
+    };
+
+    // post generated task to tasking 
+
+
     return (
         <div className="w-full">
 
@@ -1024,6 +1096,8 @@ const ProjectDetailsTask = ({ project, permissions }) => {
                                         Edit Task
                                     </button>
                                 )}
+
+                             
                                 
                                  
                                 {/* Add task button  */}
@@ -1622,8 +1696,179 @@ const ProjectDetailsTask = ({ project, permissions }) => {
                                     </div>
                                 </dialog>
                                                         
-
                             </div>
+                            {permissions.canCreateTask && (
+                                <button
+                                    onClick={handleOpenAITaskModal}
+                                    className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-primary transition hover:bg-accent/80"
+                                >
+                                    <LuLightbulb size={17} />
+                                    AI Generate
+                                </button>
+                            )}
+
+                            {/* ai genere task modal  */}
+                            <dialog
+                                ref={openAITaskModalRef}
+                                className="modal modal-bottom sm:modal-middle"
+                            >
+                                <div className="modal-box max-w-4xl">
+
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h2 className="text-2xl font-bold">
+                                                Generate Tasks with AI
+                                            </h2>
+
+                                            <p className="mt-1 text-sm text-muted">
+                                                Describe your project and let AI suggest development tasks.
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => openAITaskModalRef.current.close()}
+                                            className="btn btn-ghost btn-sm"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    <div className="mt-6">
+                                        <label className="mb-2 block text-sm font-semibold">
+                                            Project Description
+                                        </label>
+
+                                        <textarea
+                                            value={aiDescription}
+                                            onChange={(e) => setAiDescription(e.target.value)}
+                                            placeholder="Describe your project..."
+                                            className="textarea textarea-bordered min-h-36 w-full"
+                                        />
+                                        {generatedTasks.length > 0 && (
+                                            <div className="mt-6 space-y-4">
+                                                <div>
+                                                    <h3 className="text-lg font-semibold">
+                                                        AI-Generated Tasks
+                                                    </h3>
+                                                    <p className="text-sm text-muted">
+                                                        Review these suggestions before adding them to your project.
+                                                    </p>
+                                                </div>
+
+                                                {generatedTasks.map((task, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="rounded-xl border border-base-300 p-4 space-y-3"
+                                                    >
+                                                        <div className="flex items-center justify-between">
+                                                            <label className="flex items-center gap-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={selectedAITasks.includes(index)}
+                                                                    onChange={() => handleSelectAITask(index)}
+                                                                    className="checkbox checkbox-primary"
+                                                                />
+                                                                <span className="font-semibold">
+                                                                    Task {index + 1}
+                                                                </span>
+                                                            </label>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setGeneratedTasks(prev =>
+                                                                        prev.filter((_, i) => i !== index)
+                                                                    );
+
+                                                                    setSelectedAITasks(prev =>
+                                                                        prev
+                                                                            .filter(i => i !== index)
+                                                                            .map(i => i > index ? i - 1 : i)
+                                                                    );
+                                                                }}
+                                                                className="text-error hover:opacity-70"
+                                                            >
+                                                                <LuX size={18} />
+                                                            </button>
+                                                        </div>
+
+                                                        <input
+                                                            value={task.title}
+                                                            onChange={(e) => {
+                                                                const updated = [...generatedTasks];
+                                                                updated[index] = {
+                                                                    ...updated[index],
+                                                                    title: e.target.value
+                                                                };
+                                                                setGeneratedTasks(updated);
+                                                            }}
+                                                            className="input input-bordered w-full"
+                                                            placeholder="Task title"
+                                                        />
+
+                                                        <textarea
+                                                            value={task.description}
+                                                            onChange={(e) => {
+                                                                const updated = [...generatedTasks];
+                                                                updated[index] = {
+                                                                    ...updated[index],
+                                                                    description: e.target.value
+                                                                };
+                                                                setGeneratedTasks(updated);
+                                                            }}
+                                                            className="textarea textarea-bordered w-full"
+                                                            placeholder="Task description"
+                                                        />
+
+                                                        <select
+                                                            value={task.priority}
+                                                            onChange={(e) => {
+                                                                const updated = [...generatedTasks];
+                                                                updated[index] = {
+                                                                    ...updated[index],
+                                                                    priority: e.target.value
+                                                                };
+                                                                setGeneratedTasks(updated);
+                                                            }}
+                                                            className="select select-bordered w-full"
+                                                        >
+                                                            <option value="High">High</option>
+                                                            <option value="Medium">Medium</option>
+                                                            <option value="Low">Low</option>
+                                                        </select>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <p className="text-sm text-muted">
+                                            {selectedAITasks.length} of {generatedTasks.length} tasks selected
+                                        </p>
+                                    </div>
+
+                                    <div className="mt-6 flex justify-end gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => openAITaskModalRef.current.close()}
+                                            className="btn btn-ghost"
+                                        >
+                                            Cancel
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={handleGenerateTasks}
+                                            disabled={generateTasksMutation.isPending}
+                                            className="btn btn-primary"
+                                        >
+                                            {generateTasksMutation.isPending
+                                                ? 'Generating...'
+                                                : 'Generate Tasks'}
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </dialog>
                         </div>
                         
 
