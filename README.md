@@ -4,19 +4,15 @@
 
 DevFlow is a project and task management web app for development teams. It brings project progress, task ownership, team activity, and schedules into one workspace—so teams can spend less time piecing together updates and more time delivering work.
 
-> Screenshot images below are temporary placeholders. Replace them with real captures when they are ready.
-
 ## Screenshots
 
-| DevFlow home | Dashboard |
+| Calendar | AI task generation |
 | --- | --- |
-| ![Temporary placeholder for the DevFlow home page](https://placehold.co/1200x675/edeaff/4338ca?text=Replace+with+DevFlow+Home+Screenshot) | ![Temporary placeholder for the dashboard](https://placehold.co/1200x675/edeaff/4338ca?text=Replace+with+Dashboard+Screenshot) |
+| ![DevFlow calendar showing tasks and deadlines](src/assets/images/calendar.png) | ![AI task generation form with suggested tasks](src/assets/images/task%20generate.png) |
 
-| Project workspace | Tasks and team |
-| --- | --- |
-| ![Temporary placeholder for the project workspace](https://placehold.co/1200x675/edeaff/4338ca?text=Replace+with+Project+Screenshot) | ![Temporary placeholder for tasks and team views](https://placehold.co/1200x675/edeaff/4338ca?text=Replace+with+Tasks+or+Team+Screenshot) |
+### Team management
 
-To add your screenshots, save the image files in the repository and replace each placeholder URL above with its relative file path, for example `docs/screenshots/dashboard.png`.
+![DevFlow team management dashboard showing members, projects, and task progress](src/assets/images/team%20dashboard.png)
 
 ## The problem
 
