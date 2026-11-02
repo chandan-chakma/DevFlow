@@ -27,7 +27,7 @@ const TasksShow = () => {
         queryKey:['tasks',search,status,priority,sort],
         queryFn: async () => {
             const res = await axiosSecure.get(`/tasks?searchText=${search}&status=${status}&priority=${priority}&sort=${sort}`)
-            console.log(res)
+            // console.log(res)
             return res.data
         }
     })

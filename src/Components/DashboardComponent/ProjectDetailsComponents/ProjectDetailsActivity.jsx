@@ -155,7 +155,7 @@ const formatActivityHeading = (dateString) => {
     return formatActivityDate(dateString);
 };
 const ProjectDetailsActivity = ({ project }) => {
-    console.log(project._id)
+    // console.log(project._id)
     const axiosSecure = UseAxiosSecures();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [filter, setFilter] = useState('all');
@@ -166,7 +166,7 @@ const ProjectDetailsActivity = ({ project }) => {
         queryKey: ['projectActivites', project?._id], 
         queryFn: async () => {
             const res = await axiosSecure.get(`/projects/${project._id}/activities`);
-            console.log(res);
+            // console.log(res);
             return res.data.map(normalizeActivity);
         },
         enabled: Boolean(project?._id),

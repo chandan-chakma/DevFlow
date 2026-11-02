@@ -108,7 +108,7 @@ const Calendar = () => {
         queryKey: ["my-calendar-tasks"],
         queryFn: async () => {
             const response = await axiosSecure.get("/my-calendar-tasks");
-            console.log(response)
+            // console.log(response)
             return Array.isArray(response.data) ? response.data : [];
         },
     });

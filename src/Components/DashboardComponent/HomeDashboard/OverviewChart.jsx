@@ -10,7 +10,7 @@ const OverviewChart = () => {
         queryKey: ['dashboard-overview-chart',range],
         queryFn: async () => {
             const res = await axiosSecure.get(`/dashboard/overview-chart?range=${range}`)
-            console.log(res);
+            // console.log(res);
             return res.data.chartData;
         }
     })

@@ -27,7 +27,7 @@ const ProjectDetailsTask = ({ project, permissions }) => {
     const [sort, setSort] = useState('due-latest');
     // selected task show write panel 
     const [selectedTask, setSelectedTask] = useState(null);
-    console.log(selectedTask)
+    // console.log(selectedTask)
     
     const { _id:id } = project
     // console.log(_id)
@@ -142,7 +142,7 @@ const ProjectDetailsTask = ({ project, permissions }) => {
 
         const handleTaskUpdated = (updatedTask) => {
             // console.log('🔄 Task updated:', updatedTask);
-            console.log('🔄 task-updated received in browser:', updatedTask);
+            // console.log('🔄 task-updated received in browser:', updatedTask);
 
             queryClient.invalidateQueries({
                 queryKey: ['project-tasks', id],
@@ -159,12 +159,12 @@ const ProjectDetailsTask = ({ project, permissions }) => {
 
         
         const handleNewComment = (comment) => {
-            console.log('🔔 New comment event received:', comment);
+            // console.log('🔔 New comment event received:', comment);
 
             const taskId = comment?.taskId?.toString();
 
             if (!taskId) {
-                console.log('❌ Comment has no taskId');
+                // console.log('❌ Comment has no taskId');
                 return;
             }
 
@@ -445,8 +445,8 @@ const ProjectDetailsTask = ({ project, permissions }) => {
     const [aiDescription, setAiDescription] = useState('');
     const [generatedTasks, setGeneratedTasks] = useState([]);
     const [selectedAITasks, setSelectedAITasks] = useState([]);
-    console.log(aiDescription);
-    console.log(generatedTasks)
+    // console.log(aiDescription);
+    // console.log(generatedTasks)
     const openAITaskModalRef = useRef();
 
     const handleOpenAITaskModal = () => {

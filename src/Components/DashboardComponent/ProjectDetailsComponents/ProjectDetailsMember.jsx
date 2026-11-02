@@ -50,7 +50,7 @@ const ProjectDetailsMember = ({ project, permissions }) => {
         }
     });
     const handleAddMember = (user) => {
-        console.log(user);
+        // console.log(user);
         addMemberMutation.mutate(user._id);
     }
 

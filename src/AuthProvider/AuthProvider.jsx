@@ -62,7 +62,7 @@ const AuthProvider = ({ children }) => {
                         email: currentUser.email
                     });
 
-                    console.log('Token response:', res.data);
+                    // console.log('Token response:', res.data);
                 }
             } catch (error) {
                 console.error('Failed to get token:', error);

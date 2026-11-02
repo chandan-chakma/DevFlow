@@ -19,7 +19,7 @@ const MyTasks = () => {
         queryKey: ['myTasks'],
         queryFn: async () => {
             const res = await axiosSecure.get('/dashboard/my-recent-tasks')
-            console.log(res);
+            // console.log(res);
             return res.data.tasks;
         }
     })

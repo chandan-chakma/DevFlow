@@ -90,7 +90,7 @@ const Team = () => {
         queryKey: ["team-summary"],
         queryFn: async () => {
             const res = await axiosSecure.get("/team/summary");
-            console.log(res)
+            // console.log(res)
             return res.data;
         },
     });
@@ -105,7 +105,7 @@ const Team = () => {
         queryKey: ["team-members"],
         queryFn: async () => {
             const res = await axiosSecure.get("/team/members");
-            console.log(res)
+            // console.log(res)
             return res.data;
         },
     });
