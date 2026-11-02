@@ -16,7 +16,9 @@ DevFlow is a project and task management web app for development teams. It bring
 
 ## Demo
 
-[▶ Watch the DevFlow showcase video](https://github.com/chandan-chakma/DevFlow/raw/refs/heads/main/public/demo.mp4)
+<video src="https://raw.githubusercontent.com/chandan-chakma/DevFlow/main/public/demo.mp4" controls width="100%">
+  Your browser does not support embedded videos. [Watch the DevFlow showcase video](https://raw.githubusercontent.com/chandan-chakma/DevFlow/main/public/demo.mp4).
+</video>
 
 ## The problem
 
