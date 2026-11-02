@@ -14,6 +14,10 @@ DevFlow is a project and task management web app for development teams. It bring
 
 ![DevFlow team management dashboard showing members, projects, and task progress](src/assets/images/team%20dashboard.png)
 
+## Demo
+
+[▶ Watch the DevFlow showcase video](https://github.com/chandan-chakma/DevFlow/raw/refs/heads/main/public/demo.mp4)
+
 ## The problem
 
 Project updates often end up scattered across conversations, task lists, and calendars. That makes it harder to answer basic questions: What is in progress? Who owns the next step? Has a deadline changed? DevFlow provides a shared workspace where teams can see projects, tasks, schedules, and activity together.
